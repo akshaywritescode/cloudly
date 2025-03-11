@@ -4,11 +4,12 @@ import HeroSection from "./sections/HeroSection";
 export default function Home() {
   return (
     <>
-      <header>
+      <header className="h-screen w-screen">
         <Navbar />
+        <HeroSection />
       </header>
       <main>
-          <HeroSection />
+          
       </main>
     </>
   );
