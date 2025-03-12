@@ -29,7 +29,7 @@ export default function PricingCard({
   seeAllFeatureLink: string;
 }) {
   return (
-    <Card className="w-[350px] flex flex-col items-center relative">
+    <Card className="w-[320px] flex flex-col items-center relative">
       <CardHeader>
         <CardTitle className="text-center mb-5">{planTitle}</CardTitle>
         <CardDescription className="text-center">
@@ -58,7 +58,7 @@ export default function PricingCard({
                 key={index}
                 className="flex gap-3 flex-col font-normal text-sm"
               >
-                <Separator className="mt-3 bg-black/10" />
+                <Separator className="mt-3" />
                 <div className="flex gap-2">
                   <Check className="w-5" />
                   {feature}

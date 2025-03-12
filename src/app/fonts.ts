@@ -9,7 +9,7 @@ export const poppins = Poppins({
 
 export const montserrat = Montserrat({
   subsets: ["latin"],
-  weight: ["500",], // Choose the weights you need
+  weight: ["500", "600",], // Choose the weights you need
   style: ["normal", "italic"], // Optional: Choose styles if needed
   display: "swap", // Optional: Adds swap for better performance
 })

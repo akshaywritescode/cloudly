@@ -8,15 +8,5 @@ type TSeparator = {
 };
 
 export default function Separator({ className }: TSeparator) {
-  const { theme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Avoid rendering theme-based class until mounted
-  const themeClass = !mounted ? "" : theme === "light" ? "bg-black/10" : "bg-white/10";
-
-  return <div className={`${className} ${themeClass} h-[1px]`} />;
+  return <div className={`${className} bg-black/10 h-[1px]`} />;
 }
