@@ -28,9 +28,15 @@ export default function TestimonialSection() {
         { description: "I switched to Rangoli UI from another UI kit, and I'm never looking back. The developer experience is unmatched!", testimonialAvatar: avatar9, testimonialName: "Ethan Reynolds", testimonialUserHandle: "@ethanreact" }
     ];
 
-    const column1 = [...testimonialData, ...testimonialData, ...testimonialData].sort(() => Math.random() - 0.5);
-    const column2 = [...testimonialData, ...testimonialData, ...testimonialData].sort(() => Math.random() - 0.5);
-    const column3 = [...testimonialData, ...testimonialData, ...testimonialData].sort(() => Math.random() - 0.5);
+    const column1 = [...testimonialData, ...testimonialData, ...testimonialData]
+        .map(item => ({ ...item, testimonialAvatar: item.testimonialAvatar.src }))
+        .sort(() => Math.random() - 0.5);
+    const column2 = [...testimonialData, ...testimonialData, ...testimonialData]
+        .map(item => ({ ...item, testimonialAvatar: item.testimonialAvatar.src }))
+        .sort(() => Math.random() - 0.5);
+    const column3 = [...testimonialData, ...testimonialData, ...testimonialData]
+        .map(item => ({ ...item, testimonialAvatar: item.testimonialAvatar.src }))
+        .sort(() => Math.random() - 0.5);
 
     return (
         <section className="bg-black py-28 px-3 overflow-hidden">
@@ -64,7 +70,7 @@ export default function TestimonialSection() {
     );
 }
 
-function VerticalCarousel({ items, direction, speed }) {
+function VerticalCarousel({ items, direction, speed }: { items: Array<{ description: string; testimonialAvatar: string; testimonialName: string; testimonialUserHandle: string; }>, direction: "up" | "down", speed: number }) {
     const totalHeight = items.length * 400;
     
     return (
@@ -87,10 +93,10 @@ function VerticalCarousel({ items, direction, speed }) {
                     <div key={index} className="w-full flex-shrink-0" >
                         <TestimonialCard
                             description={testimonial.description}
-                            testimonialAvatar={testimonial.testimonialAvatar}
-                            testimonialAvatarAlt={`Avatar ${index}`}
                             testimonialName={testimonial.testimonialName}
                             testimonialUserHandle={testimonial.testimonialUserHandle}
+                            testimonialAvatar={testimonial.testimonialAvatar}
+                            testimonialAvatarAlt={`Avatar ${index}`}
                         />
                     </div>
                 ))}

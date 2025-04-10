@@ -5,7 +5,7 @@ type TTestimonialCard = {
     description: string
     testimonialName: string
     testimonialUserHandle: string
-    testimonialAvatar: StaticImageData,
+    testimonialAvatar: StaticImageData | string,
     testimonialAvatarAlt: string
 }
 
