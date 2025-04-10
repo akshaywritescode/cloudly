@@ -76,11 +76,12 @@ const footerSections = [
             "Jobs": "#",
             "Investor Relation": "#",
             "ESG": "#",
+            "Plus": "#",
         }
     }
 ];
 
-function FooterSection({ title, data }: { title: string, data: string }) {
+function FooterSection({ title, data }: { title: string, data: Record<string, string> }) {
     return (
         <div>
             <h3 className={`${montserrat.className} text-lg font-semibold`}>{title}</h3>
@@ -103,7 +104,11 @@ export default function Footer() {
             {/* Responsive Grid Layout */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-10 mb-12 justify-between">
                 {footerSections.map((section, index) => (
-                    <FooterSection key={index} title={section.title} data={section.data} />
+                    <FooterSection
+                        key={index}
+                        title={section.title}
+                        data={section.data as unknown as Record<string, string>}
+                    />
                 ))}
             </div>
 
