@@ -89,7 +89,7 @@ function FooterSection({ title, data }: { title: string, data: Record<string, st
             <ul className="mt-4 flex flex-col gap-2">
                 {Object.entries(data).map(([name, link], index) => (
                     <li key={index}>
-                        <Link href={link} className="text-sm hover:text-blue-400 transition">
+                        <Link href={link} className="text-sm hover:text-[16px] transition-all">
                             {name}
                         </Link>
                     </li>
