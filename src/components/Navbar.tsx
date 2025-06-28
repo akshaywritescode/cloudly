@@ -12,7 +12,7 @@ export default function Navbar() {
     return (
         <nav className="p-4 flex items-center justify-between w-full h-[5rem]">
             <div className="flex items-center gap-4">
-                <Logo />
+                <Logo color={"text-blue-600"} />
                 
                 {/* Left-side Links (Hidden later than right-side) */}
                 <ul className="hidden md:flex gap-7 items-center">

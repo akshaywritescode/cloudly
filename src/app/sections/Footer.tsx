@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { montserrat } from "../fonts";
 import { Facebook, Twitter, Youtube } from "lucide-react";
+import Logo from "@/components/ui/Logo";
 
 const footerSections = [
     {
@@ -101,6 +102,10 @@ function FooterSection({ title, data }: { title: string, data: Record<string, st
 export default function Footer() {
     return (
         <div className="bg-black py-16 px-6 text-white">
+            <div className="mb-10 flex flex-col gap-2">
+                <Logo color={"text-white"} />
+                <span className="text-xs">&copy; 2025 Cloudly. All rights reserved</span>
+            </div>
             {/* Responsive Grid Layout */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-10 mb-12 justify-between">
                 {footerSections.map((section, index) => (
