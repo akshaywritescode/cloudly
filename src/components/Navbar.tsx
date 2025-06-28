@@ -11,7 +11,7 @@ export default function Navbar() {
 
     return (
         <nav className="p-4 flex items-center justify-between w-full h-[5rem]">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-10">
                 <Logo color={"text-blue-600"} />
                 
                 {/* Left-side Links (Hidden later than right-side) */}
@@ -38,7 +38,7 @@ export default function Navbar() {
                 <Link href="#"><Earth className="w-5" /></Link>
                 <Link href="#" className="text-sm font-medium hover:text-blue-600">Contact Sales</Link>
                 <Link href="#" className="text-sm font-medium hover:text-blue-600">Get app</Link>
-                <Link href="#" className="text-sm font-medium hover:text-blue-600">Log in</Link>
+                <Link href="/auth/login" className="text-sm font-medium hover:text-blue-600">Log in</Link>
                 <Link href="#"><Button className="btn-primary">Get started</Button></Link>
             </div>
 
