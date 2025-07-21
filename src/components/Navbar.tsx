@@ -39,7 +39,7 @@ export default function Navbar() {
                 <Link href="#" className="text-sm font-medium hover:text-blue-600">Contact Sales</Link>
                 <Link href="#" className="text-sm font-medium hover:text-blue-600">Get app</Link>
                 <Link href="/auth/login" className="text-sm font-medium hover:text-blue-600">Log in</Link>
-                <Link href="#"><Button className="btn-primary">Get started</Button></Link>
+                <Link href="/auth/signup"><Button className="btn-primary">Get started</Button></Link>
             </div>
 
             {/* Mobile Menu Button (Appears as soon as right-side links are hidden) */}
