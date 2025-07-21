@@ -71,7 +71,7 @@ export default function SignupForm() {
                 data.name
             );
             await account.createEmailPasswordSession(data.email, data.password);
-
+            console.log(response)
 
             // redirect or success logic here
 
