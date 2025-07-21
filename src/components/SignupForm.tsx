@@ -13,7 +13,7 @@ import PasswordInput from "@/components/PasswordInput";
 import Separator from "@/components/Separator";
 import OAuthComponent from "@/components/OAuthComponent";
 import { ID } from "appwrite";
-import { account } from "@/lib/appwrite"
+import { getAccount } from "@/lib/appwrite";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -64,6 +64,7 @@ export default function SignupForm() {
         setBackendError(""); // Clear previous errors
 
         try {
+            const account = getAccount(); // 👈 safely init with env vars
             const response = await account.create(
                 ID.unique(),
                 data.email,
