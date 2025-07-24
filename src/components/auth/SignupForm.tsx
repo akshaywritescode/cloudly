@@ -11,11 +11,13 @@ import { DevTool } from "@hookform/devtools";
 import { useWatch } from "react-hook-form";
 import PasswordInput from "@/components/PasswordInput";
 import Separator from "@/components/Separator";
-import OAuthComponent from "@/components/OAuthComponent";
+import OAuthComponent from "@/components/auth/OAuthComponent";
 import { ID } from "appwrite";
 import { getAccount } from "@/lib/appwrite";
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
 
 // Infer types from Zod schema
 type SignUpFormValues = z.infer<typeof signUpSchema>;
@@ -24,6 +26,7 @@ type SignUpFormValues = z.infer<typeof signUpSchema>;
 export default function SignupForm() {
     const [backendError, setBackendError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter()
 
     const {
         register,
@@ -64,17 +67,17 @@ export default function SignupForm() {
         setBackendError(""); // Clear previous errors
 
         try {
-            const account = getAccount(); // 👈 safely init with env vars
-            const response = await account.create(
+            const account = getAccount();
+            await account.create(
                 ID.unique(),
                 data.email,
                 data.password,
                 data.name
             );
             await account.createEmailPasswordSession(data.email, data.password);
-            console.log(response)
-
-            // redirect or success logic here
+            await account.createVerification(`${window.location.origin}/auth/verify-account`);
+            localStorage.setItem('verify-email', data.email);
+            router.push("/auth/sent-verify-mail");
 
         } catch (error: any) {
             console.error("Signup failed:", error);
