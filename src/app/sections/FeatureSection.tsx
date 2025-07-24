@@ -1,8 +1,8 @@
 import FeatureCard from "@/components/FeatureCard";
 import { montserrat } from "../fonts";
-import featureImage1 from "@/app/assets/hero-image.webp"
-import featureImage2 from "@/app/assets/feature2.webp"
-import featureImage3 from "@/app/assets/feature3.webp"
+import featureImage1 from "@/app/assets/feature-img-1.svg"
+import featureImage2 from "@/app/assets/feature-img-2.svg"
+import featureImage3 from "@/app/assets/feature-img-3.svg"
 
 
 const featureData = [{
