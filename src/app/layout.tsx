@@ -52,7 +52,7 @@ export default function RootLayout({
         {/* Favicon */}
         <link rel="icon" href="/icon.svg" type="image/svg+xml" />
       </head>
-      <body className={`${poppins.className} antialiased overflow-x-hidden max-w-[1400px]`}>
+      <body className={`${poppins.className} antialiased max-w-[1400px] m-auto`}>
         {children}
       </body>
     </html>
