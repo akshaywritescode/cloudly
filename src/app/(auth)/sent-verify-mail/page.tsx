@@ -55,27 +55,40 @@ export default function SentVerifyMail() {
     }
 
     return (
-        <main className='w-full h-[calc(100vh-5rem)] flex flex-row-reverse'>
-            <div className='w-1/2 flex justify-center items-center flex-col px-16'>
-                <MailCheck className='w-14 h-14 mb-5' />
-                <h1 className='text-4xl font-medium'>Verify your email address</h1>
-                <p className='mt-3 text-center font-normal text-black/50'>
-                    To get started we sent you a confirmation link on your mail <span className='text-blue-600'>{email}</span>, click that link to get your Cloudly account verified.
+        <main className="w-full my-10 h-auto flex flex-col-reverse justify-center items-center gap-6   lg:h-auto">
+            {/* Left: Content */}
+            <div className="flex flex-col justify-center items-center px-4 sm:w-[29rem] sm:px-8 lg:w-[48rem]">
+                <MailCheck className="w-14 h-14 mb-5" />
+                <h1 className="text-2xl md:text-3xl lg:text-4xl font-medium">
+                    Verify your email address
+                </h1>
+                <p className="mt-3 text-center text-black/50 font-normal">
+                    To get started we sent you a confirmation link on your mail{" "}
+                    <span className="text-blue-600">{email}</span>, click that link to get your Cloudly account verified.
                 </p>
-                <div className='w-full flex gap-3 mt-8'>
-                    <div className='w-1/2'>
+                <div className="flex flex-col gap-3 mt-8 lg:w-[40rem]">
+                    <div className="w-full">
                         <WrongMailDialog />
                     </div>
-                    <Button className='w-1/2 cursor-pointer' onClick={handleResendMail}>
+                    <Button className="w-full cursor-pointer" onClick={handleResendMail}>
                         Resend Mail
                     </Button>
                 </div>
-                <span className='mt-6 text-xs text-green-600 text-center'>
-                    {resendMsgState ? "Verification email has been resent. Please check your inbox." : ""}
-                </span>
+                {resendMsgState && (
+                    <span className="mt-6 text-xs text-green-600 text-center">
+                        Verification email has been resent. Please check your inbox.
+                    </span>
+                )}
             </div>
-            <div className='w-1/2 flex justify-center items-center'>
-                <Image src={VerifyMailIllustration} alt='illustration' unoptimized className='w-[400px] h-[400px]' />
+
+            {/* Right: Illustration */}
+            <div className="w-1/2 flex justify-center items-center lg:w-full">
+                <Image
+                    src={VerifyMailIllustration}
+                    alt="illustration"
+                    unoptimized
+                    className="w-[250px] h-[250px] sm:w-[300px] sm:h-[300px] lg:w-[400px] lg:h-[400px]"
+                />
             </div>
         </main>
     );
