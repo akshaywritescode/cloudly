@@ -38,22 +38,22 @@ export default function ForgotPassword() {
     };
 
     return (
-        <main className="w-full h-[calc(100vh-5rem)] flex">
-            <div className="w-1/2 justify-center items-center sm:hidden md:hidden lg:flex">
+        <main className="w-full h-auto mt-5 mb-14 flex flex-col items-center">
+            <div className="w-1/2 justify-center items-center hidden lg:flex">
                 <Image
                     src={ForgotPasswordIllustration}
                     alt="Forgot Password Illustration"
                     unoptimized
-                    className="w-[400px] h-[400px]"
+                    className="w-[400px] h-[400px] sm:w-[200px] sm:h-[200px]"
                 />
             </div>
-            <div className="w-full flex flex-col justify-center items-center px-16 md:w-[70%] lg:w-1/2">
+            <div className="w-full flex flex-col justify-center items-center px-8 md:w-[70%] lg:w-1/2">
                 <Lock className="w-14 h-14 mb-5" />
-                <h1 className="text-4xl font-medium">Forgot Password?</h1>
+                <h1 className="text-3xl font-medium lg:text-4xl">Forgot Password?</h1>
                 <p className="mt-3 text-center font-normal text-black/50">
                     Forgot your password? Don’t worry — just enter your registered email below, and we’ll send you a password reset link.
                 </p>
-                <div className="flex gap-4 mt-7 w-full">
+                <div className="flex flex-col gap-4 mt-7 w-full lg:flex-row">
                     <Input
                         placeholder="Email"
                         type="email"
