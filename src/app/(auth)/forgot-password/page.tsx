@@ -27,7 +27,7 @@ export default function ForgotPassword() {
             const account = getAccount();
             await account.createRecovery(
                 email,
-                `${window.location.origin}/auth/reset-password`
+                `${window.location.origin}/reset-password`
             );
             setMessage("Reset link sent! Please check your email.");
         } catch (error: any) {
