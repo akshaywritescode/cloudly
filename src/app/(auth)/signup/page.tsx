@@ -1,4 +1,4 @@
-import PublicRoute from "@/components/auth/PublicRoute.";
+import PublicRoute from "@/components/auth/PublicRoute";
 import SignupForm from "@/components/auth/SignupForm";
 import Logo from "@/components/ui/Logo";
 

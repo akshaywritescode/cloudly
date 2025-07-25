@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import Loader from "@/components/Loader";
+import { getAccount } from "@/lib/appwrite";
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
@@ -16,9 +16,17 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
             if (!user) {
                 router.replace("/auth/login");
-            } else {
-                setIsAuthenticated(true);
+                return;
             }
+
+            if (!user.emailVerification) {
+                localStorage.setItem("verify-email", user.email);
+                router.replace("/sent-verify-mail");
+                const account = getAccount();
+                await account.createVerification(`${window.location.origin}/verify-account`);
+                return;
+            }
+
             setIsLoading(false);
         };
 
@@ -26,8 +34,6 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     }, [router]);
 
     if (isLoading) return <Loader />;
-
-    if (!isAuthenticated) return null;
 
     return <>{children}</>;
 }

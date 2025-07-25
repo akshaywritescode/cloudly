@@ -71,7 +71,7 @@ export default function LoginForm() {
 
         {/* backend error */}
         {backendError && (
-          <p className="text-red-500 text-sm ml-2 mb-2">{backendError}</p>
+          <p className="text-red-500 text-sm ml-2 mt-3">{backendError}</p>
         )}
 
         {/* Submit button */}

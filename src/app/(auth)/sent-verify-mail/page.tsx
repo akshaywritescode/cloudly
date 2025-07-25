@@ -50,7 +50,7 @@ export default function SentVerifyMail() {
 
     async function handleResendMail() {
         const account = getAccount();
-        await account.createVerification(`${window.location.origin}/auth/verify-account`);
+        await account.createVerification(`${window.location.origin}/verify-account`);
         setResendMsgState(true);
     }
 

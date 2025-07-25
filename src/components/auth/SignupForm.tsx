@@ -181,7 +181,7 @@ export default function SignupForm() {
         <OAuthComponent />
         <Separator />
         <span className="text-sm mt-6 flex justify-center text-black/60">
-            Already have an account?<span className="underline text-black cursor-pointer">&nbsp;<Link href={"/auth/login"}>Log in here</Link></span>
+            Already have an account?<span className="underline text-black cursor-pointer">&nbsp;<Link href={"/login"}>Log in here</Link></span>
         </span>
         <div className="mt-10 text-center">
             <span className="text-xs text-center" >

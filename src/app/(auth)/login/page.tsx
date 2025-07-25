@@ -1,5 +1,5 @@
 import LoginForm from "@/components/auth/LoginForm";
-import PublicRoute from "@/components/auth/PublicRoute.";
+import PublicRoute from "@/components/auth/PublicRoute";
 import Logo from "@/components/ui/Logo";
 
 

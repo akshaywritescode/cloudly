@@ -1,4 +1,4 @@
-import PublicRoute from "@/components/auth/PublicRoute.";
+import PublicRoute from "@/components/auth/PublicRoute";
 import Navbar from "../components/Navbar";
 import DiscoverSection from "./sections/DiscoverSection";
 import FeatureSection from "./sections/FeatureSection";
