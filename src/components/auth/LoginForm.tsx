@@ -14,7 +14,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getAccount } from "@/lib/appwrite";
-import { DevTool } from "@hookform/devtools";
 
 // Infer types from Zod schema
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -43,7 +42,6 @@ export default function LoginForm() {
       await account.createEmailPasswordSession(data.email, data.password);
       router.push("/dashboard");
     } catch (error: any) {
-      console.error("Login failed:", error);
       setBackendError(error?.message || "Login failed");
     } finally {
       setIsLoading(false);
@@ -87,8 +85,6 @@ export default function LoginForm() {
             "Log In"
           )}
         </Button>
-
-        <DevTool control={control} />
       </form>
 
       {/* OR separator */}

@@ -39,7 +39,7 @@ export default function ForgotPassword() {
 
     return (
         <main className="w-full h-[calc(100vh-5rem)] flex">
-            <div className="w-1/2 flex justify-center items-center">
+            <div className="w-1/2 justify-center items-center sm:hidden md:hidden lg:flex">
                 <Image
                     src={ForgotPasswordIllustration}
                     alt="Forgot Password Illustration"
@@ -47,7 +47,7 @@ export default function ForgotPassword() {
                     className="w-[400px] h-[400px]"
                 />
             </div>
-            <div className="w-1/2 flex flex-col justify-center items-center px-16">
+            <div className="w-full flex flex-col justify-center items-center px-16 md:w-[70%] lg:w-1/2">
                 <Lock className="w-14 h-14 mb-5" />
                 <h1 className="text-4xl font-medium">Forgot Password?</h1>
                 <p className="mt-3 text-center font-normal text-black/50">
