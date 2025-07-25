@@ -7,7 +7,6 @@ import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Check, Loader2Icon, Plus } from "lucide-react";
-import { DevTool } from "@hookform/devtools";
 import { useWatch } from "react-hook-form";
 import PasswordInput from "@/components/PasswordInput";
 import Separator from "@/components/Separator";
@@ -64,7 +63,7 @@ export default function SignupForm() {
 
     const onSubmit = async (data: SignUpFormValues) => {
         setIsLoading(true);
-        setBackendError(""); // Clear previous errors
+        setBackendError(""); 
 
         try {
             const account = getAccount();
@@ -75,12 +74,11 @@ export default function SignupForm() {
                 data.name
             );
             await account.createEmailPasswordSession(data.email, data.password);
-            await account.createVerification(`${window.location.origin}/auth/verify-account`);
+            await account.createVerification(`${window.location.origin}/verify-account`);
             localStorage.setItem('verify-email', data.email);
-            router.push("/auth/sent-verify-mail");
+            router.push("/sent-verify-mail");
 
         } catch (error: any) {
-            console.error("Signup failed:", error);
             setBackendError(error?.message || "Signup failed");
         } finally {
             setIsLoading(false);
@@ -174,9 +172,6 @@ export default function SignupForm() {
                     "Sign Up Now"
                 )}
             </Button>
-
-            <DevTool control={control} />
-
         </form>
         <div className="my-10 relative">
             <span className="bg-white p-2 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">or</span>
