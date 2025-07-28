@@ -10,8 +10,6 @@ import { getAccount } from "@/lib/appwrite";
 import PasswordInput from "@/components/PasswordInput";
 import { Check, Plus, Key } from "lucide-react";
 import { useState } from "react";
-import Image from "next/image";
-import ResetIllustration from "@/app/assets/reset-password-illustration.svg";
 
 type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 
@@ -61,7 +59,7 @@ export default function ResetPassword() {
             await account.updateRecovery(userId!, secret!, data.password);
             setSuccess(true);
             setSuccessMessage("Password updated successfully. You can now log in, redirecting to login page...");
-            setTimeout(() => router.push("/auth/login"), 2000);
+            setTimeout(() => router.push("/login"), 2000);
         } catch (err: any) {
             setBackendError(err?.message || "Invalid or expired reset link.");
         } finally {
@@ -78,19 +76,16 @@ export default function ResetPassword() {
     }
 
     return (
-        <main className="h-[calc(100vh-5rem)] flex">
+        <main className="h-auto flex my-16 lg:h-[calc(100vh-5rem)]">
             {!success ? (
                 <>
-                    <div className="w-1/2 flex justify-center items-center">
-                        <Image src={ResetIllustration} alt="Reset Illustration" className="w-[400px] h-[400px]" />
-                    </div>
-                    <div className="w-1/2 flex justify-center items-center flex-col px-14">
+                    <div className="w-full m-auto flex justify-center items-center flex-col px-5">
                         <Key className="w-14 h-14 mb-5" />
-                        <h1 className="text-4xl font-medium">Reset Your Password</h1>
+                        <h1 className="sm:text-4xl font-medium text-2xl">Reset Your Password</h1>
                         <p className="mt-3 text-center font-normal text-black/50">
                             Enter the new password that you want to set.
                         </p>
-                        <form onSubmit={handleSubmit(onSubmit)} className="mt-7 w-full px-10 flex flex-col gap-4">
+                        <form onSubmit={handleSubmit(onSubmit)} className="mt-7 w-full px-4 flex flex-col gap-4">
                             <PasswordInput
                                 placeholder="New Password"
                                 {...register("password")}
@@ -130,7 +125,7 @@ export default function ResetPassword() {
                     </div>
                 </>
             ) : (
-                <div className="w-full flex justify-center items-center text-green-600 text-xs">
+                <div className="w-full flex justify-center items-center text-center text-green-600 text-xs">
                     {successMessage}
                 </div>
             )}
