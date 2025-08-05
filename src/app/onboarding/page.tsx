@@ -57,6 +57,10 @@ export default function Onboarding() {
         setSelectedCard(purpose);
 
         const user = await getCurrentUser();
+        if (!user) {
+            console.error("User not found");
+            return;
+        }
         const databases = getDatabase();
 
         try {
