@@ -26,6 +26,7 @@ const eslintConfig = [
     },
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
+      "react/no-unescaped-entities": "off",
 
       // Unused imports detection
       "unused-imports/no-unused-imports": "warn",

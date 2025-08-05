@@ -41,7 +41,7 @@ export default function SentVerifyMail() {
                     router.push('/dashboard');
                 }
             } catch (err) {
-                // Optional: handle or log the error
+                console.log(err)
             }
         }, 3000);
 

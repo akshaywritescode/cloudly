@@ -16,14 +16,12 @@ import { Label } from "@/components/ui/label"
 import { useState } from "react";
 import PasswordInput from "../PasswordInput";
 import { getAccount } from "@/lib/appwrite";
-import { useRouter } from "next/navigation";
 
 export function WrongMailDialog() {
   const [newEmail, setNewEmail] = useState("");
   const [oldPassword, setOldPassword] = useState("");
   const [message, setMessage] = useState("")
   const [error, setError] = useState("")
-  const router = useRouter()
 
   async function handleEmailChange() {
     try {
