@@ -12,10 +12,13 @@ import PasswordInput from "@/components/PasswordInput";
 import Separator from "@/components/Separator";
 import OAuthComponent from "@/components/auth/OAuthComponent";
 import { ID } from "appwrite";
-import { getAccount } from "@/lib/appwrite";
+import { getAccount, getDatabase } from "@/lib/appwrite";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
+const databaseId = process.env.NEXT_PUBLIC_APPWRITE_USERS_DB_ID as string;
+const collectionId = process.env.NEXT_PUBLIC_APPWRITE_USER_METADATA_COLLECTION_ID as string;
 
 
 // Infer types from Zod schema
@@ -61,9 +64,27 @@ export default function SignupForm() {
         { state: passwordsMatch, text: "Passwords match" },
     ];
 
+    const createUserMetadata = async (userId: string) => {
+        const databases = getDatabase();
+        try {
+            await databases.createDocument(
+                databaseId,
+                collectionId,
+                ID.unique(),
+                {
+                    userId,
+                    onboardingCompleted: false,
+                    purpose: ""
+                }
+            );
+        } catch (err) {
+            console.error("Failed to create user metadata:", err);
+        }
+    };
+
     const onSubmit = async (data: SignUpFormValues) => {
         setIsLoading(true);
-        setBackendError(""); 
+        setBackendError("");
 
         try {
             const account = getAccount();
@@ -73,11 +94,20 @@ export default function SignupForm() {
                 data.password,
                 data.name
             );
+
+            //creating session
             await account.createEmailPasswordSession(data.email, data.password);
+
+            //sending verification mail
             await account.createVerification(`${window.location.origin}/verify-account`);
             localStorage.setItem('verify-email', data.email);
-            router.push("/sent-verify-mail");
 
+            //fetching current user
+            const currentUser = await account.get();
+            await createUserMetadata(currentUser.$id);
+
+            //redirecting to verify mail page
+            router.push("/sent-verify-mail");
         } catch (error: any) {
             setBackendError(error?.message || "Signup failed");
         } finally {
