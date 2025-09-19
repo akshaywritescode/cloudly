@@ -9,10 +9,26 @@ import {
 import Sidebar from "./components/Sidebar";
 import { useRef, useState } from "react";
 import DashboardHeader from "./components/DashboardHeader";
+import DashboardContent from "./components/DashboardContent";
+
+export type NavigationItem = {
+  id: string;
+  label: string;
+  type?: "images" | "videos" | "docs" | "audio";
+  section: "fileTypes" | "folders" | "quickAccess";
+};
 
 export default function Dashboard() {
   const sidebarLayout = useRef<any>(null);
+  const [activeNavigation, setActiveNavigation] = useState<NavigationItem>({
+    id: "all-files",
+    label: "All Files",
+    section: "folders"
+  });
 
+  const handleNavigationChange = (item: NavigationItem) => {
+    setActiveNavigation(item);
+  };
 
   return (
     <ProtectedRoute>
@@ -22,9 +38,12 @@ export default function Dashboard() {
           className="h-full w-full"
           ref={sidebarLayout}
         >
-          <ResizablePanel defaultSize={15} minSize={10} maxSize={20}>
+          <ResizablePanel defaultSize={21} minSize={10} maxSize={20}>
             <div className="h-full p-3">
-              <Sidebar  />
+              <Sidebar 
+                activeNavigation={activeNavigation}
+                onNavigationChange={handleNavigationChange}
+              />
             </div>
           </ResizablePanel>
 
@@ -33,6 +52,7 @@ export default function Dashboard() {
           <ResizablePanel defaultSize={85}>
             <div className="h-full p-1">
               <DashboardHeader />
+              <DashboardContent activeNavigation={activeNavigation} />
             </div>
           </ResizablePanel>
         </ResizablePanelGroup>
