@@ -12,86 +12,118 @@ import {
   Clock, 
   Trash2
 } from "lucide-react";
+import { NavigationItem } from "../page";
+import SidebarItem, { SidebarItemProps } from './SidebarItem';
+import SidebarSection from './SidebarSection';
+import { useFileCounts } from '@/hooks/useFileCounts';
 
-interface SidebarItemProps {
-  icon: React.ReactNode;
-  label: string;
-  count?: number;
-  isActive?: boolean;
-  onClick?: () => void;
+interface SidebarProps {
+  activeNavigation: NavigationItem;
+  onNavigationChange: (item: NavigationItem) => void;
 }
 
-interface SidebarSection {
-  title: string;
-  items: SidebarItemProps[];
-}
+export default function Sidebar({ activeNavigation, onNavigationChange }: SidebarProps) {
+  const { counts, loading } = useFileCounts();
 
-function SidebarItem({ icon, label, count, isActive, onClick }: SidebarItemProps) {
-  return (
-    <div 
-      className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
-        isActive 
-          ? 'bg-blue-50 text-blue-700 border border-blue-200' 
-          : 'hover:bg-gray-50 text-gray-700'
-      }`}
-      onClick={onClick}
-    >
-      <div className="flex items-center gap-3">
-        <div className={`w-5 h-5 ${isActive ? 'text-blue-600' : 'text-gray-500'}`}>
-          {icon}
-        </div>
-        <span className="font-medium text-sm">{label}</span>
-      </div>
-      {count !== undefined && (
-        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-          {count}
-        </span>
-      )}
-    </div>
-  );
-}
-
-function SidebarSection({ title, items }: SidebarSection) {
-  return (
-    <div className="px-4 mb-4">
-      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-        {title}
-      </h3>
-      <div className="space-y-1">
-        {items.map((item, index) => (
-          <SidebarItem key={index} {...item} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-export default function Sidebar() {
   // File Types Data
   const fileTypesData: SidebarItemProps[] = [
-    { icon: <Images className="w-5 h-5" />, label: "Images", count: 24, isActive: true },
-    { icon: <Video className="w-5 h-5" />, label: "Videos", count: 8 },
-    { icon: <FileText className="w-5 h-5" />, label: "Documents", count: 156 },
-    { icon: <Music className="w-5 h-5" />, label: "Audio", count: 5 },
-    { icon: <Archive className="w-5 h-5" />, label: "Archives", count: 5 },
+    { 
+      icon: <Images className="w-5 h-5" />, 
+      label: "Images", 
+      count: loading ? 0 : counts.images, 
+      id: "images",
+      type: "images",
+      section: "fileTypes",
+      isActive: activeNavigation.id === "images",
+      onClick: () => onNavigationChange({ id: "images", label: "Images", type: "images", section: "fileTypes" })
+    },
+    { 
+      icon: <Video className="w-5 h-5" />, 
+      label: "Videos", 
+      count: loading ? 0 : counts.videos, 
+      id: "videos",
+      type: "videos",
+      section: "fileTypes",
+      isActive: activeNavigation.id === "videos",
+      onClick: () => onNavigationChange({ id: "videos", label: "Videos", type: "videos", section: "fileTypes" })
+    },
+    { 
+      icon: <FileText className="w-5 h-5" />, 
+      label: "Documents", 
+      count: loading ? 0 : counts.docs, 
+      id: "docs",
+      type: "docs",
+      section: "fileTypes",
+      isActive: activeNavigation.id === "docs",
+      onClick: () => onNavigationChange({ id: "docs", label: "Documents", type: "docs", section: "fileTypes" })
+    },
+    { 
+      icon: <Music className="w-5 h-5" />, 
+      label: "Audio", 
+      count: loading ? 0 : counts.audio, 
+      id: "audio",
+      type: "audio",
+      section: "fileTypes",
+      isActive: activeNavigation.id === "audio",
+      onClick: () => onNavigationChange({ id: "audio", label: "Audio", type: "audio", section: "fileTypes" })
+    },
+    { 
+      icon: <Archive className="w-5 h-5" />, 
+      label: "Archives", 
+      count: loading ? 0 : counts.archives, 
+      id: "archives",
+      section: "fileTypes",
+      isActive: activeNavigation.id === "archives",
+      onClick: () => onNavigationChange({ id: "archives", label: "Archives", section: "fileTypes" })
+    },
   ];
 
   // Folders Data
   const foldersData: SidebarItemProps[] = [
-    { icon: <FolderOpen className="w-5 h-5" />, label: "My Files", count: 205 },
-    { icon: <FolderOpen className="w-5 h-5" />, label: "Shared with me", count: 12 },
-    { icon: <FolderOpen className="w-5 h-5" />, label: "Recent", count: 8 },
+    { 
+      icon: <FolderOpen className="w-5 h-5" />, 
+      label: "All Files", 
+      count: loading ? 0 : counts.allFiles, 
+      id: "all-files",
+      section: "folders",
+      isActive: activeNavigation.id === "all-files",
+      onClick: () => onNavigationChange({ id: "all-files", label: "All Files", section: "folders" })
+    },
   ];
 
   // Quick Access Data
   const quickAccessData: SidebarItemProps[] = [
-    { icon: <Star className="w-5 h-5" />, label: "Starred", count: 15 },
-    { icon: <Clock className="w-5 h-5" />, label: "Recent", count: 32 },
-    { icon: <Trash2 className="w-5 h-5" />, label: "Trash", count: 7 },
+    { 
+      icon: <Star className="w-5 h-5" />, 
+      label: "Starred", 
+      count: loading ? 0 : counts.starred, 
+      id: "starred",
+      section: "quickAccess",
+      isActive: activeNavigation.id === "starred",
+      onClick: () => onNavigationChange({ id: "starred", label: "Starred", section: "quickAccess" })
+    },
+    { 
+      icon: <Clock className="w-5 h-5" />, 
+      label: "Recent", 
+      count: loading ? 0 : counts.recent, 
+      id: "recent",
+      section: "quickAccess",
+      isActive: activeNavigation.id === "recent",
+      onClick: () => onNavigationChange({ id: "recent", label: "Recent", section: "quickAccess" })
+    },
+    { 
+      icon: <Trash2 className="w-5 h-5" />, 
+      label: "Trash", 
+      count: loading ? 0 : counts.trash, 
+      id: "trash",
+      section: "quickAccess",
+      isActive: activeNavigation.id === "trash",
+      onClick: () => onNavigationChange({ id: "trash", label: "Trash", section: "quickAccess" })
+    },
   ];
 
   // All sections data
-  const sections: SidebarSection[] = [
+  const sections = [
     { title: "File Types", items: fileTypesData },
     { title: "Folders", items: foldersData },
     { title: "Quick Access", items: quickAccessData },
