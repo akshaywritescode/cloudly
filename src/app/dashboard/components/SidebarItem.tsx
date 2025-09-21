@@ -14,7 +14,7 @@ export interface SidebarItemProps {
 export default function SidebarItem({ icon, label, count, isActive, onClick }: SidebarItemProps) {
   return (
     <div 
-      className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
+      className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors select-none ${
         isActive 
           ? 'bg-blue-50 text-blue-700 border border-blue-200' 
           : 'hover:bg-gray-50 text-gray-700'

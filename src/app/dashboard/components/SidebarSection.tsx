@@ -14,8 +14,8 @@ export default function SidebarSection({ title, items }: SidebarSectionProps) {
         {title}
       </h3>
       <div className="space-y-1">
-        {items.map((item, index) => (
-          <SidebarItem key={index} {...item} />
+        {items.map((item) => (
+          <SidebarItem key={item.id} {...item} />
         ))}
         {title === "Folders" && (
           <CreateFolderButton onClick={() => console.log('Create folder clicked')} />

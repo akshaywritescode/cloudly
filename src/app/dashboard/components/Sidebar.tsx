@@ -13,9 +13,11 @@ import {
   Trash2
 } from "lucide-react";
 import { NavigationItem } from "../page";
-import SidebarItem, { SidebarItemProps } from './SidebarItem';
+import { SidebarItemProps } from './SidebarItem';
 import SidebarSection from './SidebarSection';
 import { useFileCounts } from '@/hooks/useFileCounts';
+import { useFolders } from '@/hooks/useFolders';
+import { useEffect, useRef } from 'react';
 
 interface SidebarProps {
   activeNavigation: NavigationItem;
@@ -23,14 +25,36 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ activeNavigation, onNavigationChange }: SidebarProps) {
-  const { counts, loading } = useFileCounts();
+  const { counts, loading: countsLoading, refetch: refetchCounts } = useFileCounts();
+  const { folders, refetch: refetchFolders } = useFolders();
+
+  // Use useRef to store stable references
+  const refetchCountsRef = useRef(refetchCounts);
+  const refetchFoldersRef = useRef(refetchFolders);
+  refetchCountsRef.current = refetchCounts;
+  refetchFoldersRef.current = refetchFolders;
+
+  // Listen for files updated event
+  useEffect(() => {
+    const handleFilesUpdated = () => {
+      console.log('Sidebar: Files updated event received, refetching...');
+      refetchCountsRef.current();
+      refetchFoldersRef.current();
+    };
+
+    window.addEventListener('filesUpdated', handleFilesUpdated);
+    
+    return () => {
+      window.removeEventListener('filesUpdated', handleFilesUpdated);
+    };
+  }, []); // Empty dependency array - event listeners are stable
 
   // File Types Data
   const fileTypesData: SidebarItemProps[] = [
     { 
       icon: <Images className="w-5 h-5" />, 
       label: "Images", 
-      count: loading ? 0 : counts.images, 
+      count: countsLoading ? 0 : counts.images, 
       id: "images",
       type: "images",
       section: "fileTypes",
@@ -40,7 +64,7 @@ export default function Sidebar({ activeNavigation, onNavigationChange }: Sideba
     { 
       icon: <Video className="w-5 h-5" />, 
       label: "Videos", 
-      count: loading ? 0 : counts.videos, 
+      count: countsLoading ? 0 : counts.videos, 
       id: "videos",
       type: "videos",
       section: "fileTypes",
@@ -50,7 +74,7 @@ export default function Sidebar({ activeNavigation, onNavigationChange }: Sideba
     { 
       icon: <FileText className="w-5 h-5" />, 
       label: "Documents", 
-      count: loading ? 0 : counts.docs, 
+      count: countsLoading ? 0 : counts.docs, 
       id: "docs",
       type: "docs",
       section: "fileTypes",
@@ -60,7 +84,7 @@ export default function Sidebar({ activeNavigation, onNavigationChange }: Sideba
     { 
       icon: <Music className="w-5 h-5" />, 
       label: "Audio", 
-      count: loading ? 0 : counts.audio, 
+      count: countsLoading ? 0 : counts.audio, 
       id: "audio",
       type: "audio",
       section: "fileTypes",
@@ -70,7 +94,7 @@ export default function Sidebar({ activeNavigation, onNavigationChange }: Sideba
     { 
       icon: <Archive className="w-5 h-5" />, 
       label: "Archives", 
-      count: loading ? 0 : counts.archives, 
+      count: countsLoading ? 0 : counts.archives, 
       id: "archives",
       section: "fileTypes",
       isActive: activeNavigation.id === "archives",
@@ -78,25 +102,32 @@ export default function Sidebar({ activeNavigation, onNavigationChange }: Sideba
     },
   ];
 
-  // Folders Data
-  const foldersData: SidebarItemProps[] = [
-    { 
-      icon: <FolderOpen className="w-5 h-5" />, 
-      label: "All Files", 
-      count: loading ? 0 : counts.allFiles, 
-      id: "all-files",
+  // Dynamic Folders Data
+  const foldersData: SidebarItemProps[] = folders.map(folder => {
+    // Use original ID for "All Files" folder, add prefix for others
+    const folderId = folder.id === 'all-files' ? folder.id : `folder-${folder.name.toLowerCase().replace(/\s+/g, '-')}`;
+    
+    return {
+      icon: <FolderOpen className="w-5 h-5" />,
+      label: folder.name,
+      count: folder.count,
+      id: folderId,
       section: "folders",
-      isActive: activeNavigation.id === "all-files",
-      onClick: () => onNavigationChange({ id: "all-files", label: "All Files", section: "folders" })
-    },
-  ];
+      isActive: activeNavigation.id === folderId,
+      onClick: () => onNavigationChange({ 
+        id: folderId, 
+        label: folder.name, 
+        section: "folders" 
+      })
+    };
+  });
 
   // Quick Access Data
   const quickAccessData: SidebarItemProps[] = [
     { 
       icon: <Star className="w-5 h-5" />, 
       label: "Starred", 
-      count: loading ? 0 : counts.starred, 
+      count: countsLoading ? 0 : counts.starred, 
       id: "starred",
       section: "quickAccess",
       isActive: activeNavigation.id === "starred",
@@ -105,7 +136,7 @@ export default function Sidebar({ activeNavigation, onNavigationChange }: Sideba
     { 
       icon: <Clock className="w-5 h-5" />, 
       label: "Recent", 
-      count: loading ? 0 : counts.recent, 
+      count: countsLoading ? 0 : counts.recent, 
       id: "recent",
       section: "quickAccess",
       isActive: activeNavigation.id === "recent",
@@ -114,7 +145,7 @@ export default function Sidebar({ activeNavigation, onNavigationChange }: Sideba
     { 
       icon: <Trash2 className="w-5 h-5" />, 
       label: "Trash", 
-      count: loading ? 0 : counts.trash, 
+      count: countsLoading ? 0 : counts.trash, 
       id: "trash",
       section: "quickAccess",
       isActive: activeNavigation.id === "trash",
@@ -130,17 +161,17 @@ export default function Sidebar({ activeNavigation, onNavigationChange }: Sideba
   ];
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full h-full flex flex-col select-none">
       {/* Logo Section */}
       <div className="flex w-full items-center justify-center p-4 border-b border-gray-200">
         <div className="flex items-center gap-2">
-          <Cloud className="w-6 h-6 text-blue-600" />
-          <span className="font-semibold text-lg text-gray-800">Cloudly</span>
+          <Cloud className="w-8 h-8 text-blue-600" />
+          <span className="font-medium text-2xl text-gray-800">Cloudly</span>
         </div>
       </div>
 
       {/* Navigation Sections */}
-      <div className="flex-1 overflow-y-auto mt-5 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+      <div className="flex-1 overflow-y-auto mt-5 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400 select-none">
         {sections.map((section, index) => (
           <SidebarSection key={index} {...section} />
         ))}
