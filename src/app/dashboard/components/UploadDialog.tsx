@@ -21,6 +21,9 @@ export default function UploadDialog({ onUploadComplete }: UploadDialogProps) {
   const [folderName, setFolderName] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [currentFileIndex, setCurrentFileIndex] = useState(0);
+  const [currentFileName, setCurrentFileName] = useState('');
+  const [uploadStatus, setUploadStatus] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,11 +35,12 @@ export default function UploadDialog({ onUploadComplete }: UploadDialogProps) {
     setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  const getFileType = (file: File): "images" | "videos" | "docs" | "audio" => {
+  const getFileType = (file: File): "images" | "videos" | "docs" | "audio" | "archives" => {
     const type = file.type.toLowerCase();
     if (type.startsWith('image/')) return 'images';
     if (type.startsWith('video/')) return 'videos';
     if (type.startsWith('audio/')) return 'audio';
+    if (type.includes('zip') || type.includes('rar') || type.includes('7z') || type.includes('tar') || type.includes('gz')) return 'archives';
     return 'docs';
   };
 
@@ -48,32 +52,92 @@ export default function UploadDialog({ onUploadComplete }: UploadDialogProps) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  // Smooth progress simulation that only moves forward
+  const simulateSmoothProgress = (fileSize: number, onProgress: (progress: number) => void) => {
+    return new Promise<void>((resolve) => {
+      // Estimate upload time based on file size (assuming average 1MB/s upload speed)
+      const estimatedUploadTimeMs = Math.max(1000, (fileSize / (1024 * 1024)) * 1000); // Minimum 1 second
+      const updateInterval = 50; // Update every 50ms
+      const totalUpdates = Math.floor(estimatedUploadTimeMs / updateInterval);
+      
+      let currentUpdate = 0;
+      let lastProgress = 0; // Track last progress to ensure forward movement
+      
+      const interval = setInterval(() => {
+        currentUpdate++;
+        
+        // Use easing function for more realistic progress (ease-out)
+        const rawProgress = (currentUpdate / totalUpdates) * 100;
+        const easedProgress = 100 - Math.pow(100 - rawProgress, 3) / 10000; // Ease-out cubic
+        const progress = Math.min(easedProgress, 95);
+        
+        // Ensure progress only moves forward
+        const finalProgress = Math.max(lastProgress, progress);
+        lastProgress = finalProgress;
+        
+        onProgress(finalProgress);
+        
+        if (currentUpdate >= totalUpdates) {
+          clearInterval(interval);
+          resolve();
+        }
+      }, updateInterval);
+    });
+  };
+
   const uploadFiles = async () => {
     if (selectedFiles.length === 0) return;
 
     setIsUploading(true);
     setUploadProgress(0);
+    setCurrentFileIndex(0);
+    setCurrentFileName('');
+    setUploadStatus('Preparing upload...');
 
     try {
       const storage = getStorage();
       const bucketId = getBucketId();
       const user = await getCurrentUser();
 
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
       for (let i = 0; i < selectedFiles.length; i++) {
         const file = selectedFiles[i];
+        setCurrentFileIndex(i + 1);
+        setCurrentFileName(file.name);
         
+        // Calculate progress range for current file
+        const fileProgressStart = (i / selectedFiles.length) * 100;
+        const fileProgressEnd = ((i + 1) / selectedFiles.length) * 100;
+        const fileProgressRange = fileProgressEnd - fileProgressStart;
+        
+        setUploadStatus(`Uploading ${file.name}...`);
+        
+        // Start smooth progress simulation
+        const progressPromise = simulateSmoothProgress(file.size, (progress) => {
+          const mappedProgress = fileProgressStart + (progress / 100) * fileProgressRange * 0.9;
+          setUploadProgress(mappedProgress);
+        });
+
         // Upload file to Appwrite storage
         const fileId = ID.unique();
-        const uploadResponse = await storage.createFile(
-          bucketId,
-          fileId,
-          file
-        );
+        
+        // Start both upload and progress simulation concurrently
+        const uploadPromise = storage.createFile(bucketId, fileId, file);
+        
+        // Wait for both to complete
+        const [uploadResponse] = await Promise.all([uploadPromise, progressPromise]);
+        
+        // Complete upload progress (90-95%)
+        setUploadProgress(fileProgressStart + fileProgressRange * 0.95);
+        setUploadStatus(`Saving ${file.name} to database...`);
 
         // Create database record
         const fileData: FileRecord = {
           fileId: uploadResponse.$id,
-          belongsTo: folderName || 'All Files',
+          belongsTo: folderName.trim() || 'All Files',
           userId: user.$id,
           fileName: file.name,
           fileType: getFileType(file),
@@ -86,25 +150,39 @@ export default function UploadDialog({ onUploadComplete }: UploadDialogProps) {
         // Save to database
         await createFileRecord(fileData);
 
-        // Update progress
-        setUploadProgress(((i + 1) / selectedFiles.length) * 100);
+        // Complete this file's progress (95-100%)
+        setUploadProgress(fileProgressEnd);
+        setUploadStatus(`${file.name} uploaded successfully!`);
+        
+        // Small delay to show completion
+        await new Promise(resolve => setTimeout(resolve, 300));
       }
 
-      // Reset form
-      setSelectedFiles([]);
-      setFolderName('');
-      setIsOpen(false);
+      setUploadStatus('All files uploaded successfully!');
       
-      if (onUploadComplete) {
-        onUploadComplete();
-      }
+      // Reset form after a short delay
+      setTimeout(() => {
+        setSelectedFiles([]);
+        setFolderName('');
+        setIsOpen(false);
+        setCurrentFileIndex(0);
+        setCurrentFileName('');
+        setUploadStatus('');
+        
+        if (onUploadComplete) {
+          onUploadComplete();
+        }
+      }, 1500);
 
     } catch (error) {
       console.error('Upload failed:', error);
+      setUploadStatus(`Upload failed: ${(error as Error).message}`);
       alert('Upload failed: ' + (error as Error).message);
     } finally {
       setIsUploading(false);
       setUploadProgress(0);
+      setCurrentFileIndex(0);
+      setCurrentFileName('');
     }
   };
 
@@ -129,11 +207,14 @@ export default function UploadDialog({ onUploadComplete }: UploadDialogProps) {
               <FolderOpen className="w-4 h-4 text-gray-500" />
               <Input
                 id="folder"
-                placeholder="Enter folder name..."
+                placeholder="Enter folder name or leave empty for 'All Files'..."
                 value={folderName}
                 onChange={(e) => setFolderName(e.target.value)}
               />
             </div>
+            <p className="text-xs text-gray-500">
+              Files will be saved to "All Files" folder if no folder name is provided.
+            </p>
           </div>
 
           {/* File Selection */}
@@ -189,13 +270,28 @@ export default function UploadDialog({ onUploadComplete }: UploadDialogProps) {
           {isUploading && (
             <div className="space-y-2">
               <Label>Upload Progress</Label>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${uploadProgress}%` }}
-                />
+              <div className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">
+                    {currentFileIndex > 0 && `File ${currentFileIndex} of ${selectedFiles.length}`}
+                  </span>
+                  <span className="text-gray-600">{Math.round(uploadProgress)}%</span>
+                </div>
+                {currentFileName && (
+                  <p className="text-xs text-gray-500 truncate">
+                    {uploadStatus}
+                  </p>
+                )}
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-200 ease-out"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+                <p className="text-xs text-gray-400 text-center">
+                  Note: Progress is estimated based on file size and network conditions
+                </p>
               </div>
-              <p className="text-sm text-gray-600">{Math.round(uploadProgress)}% complete</p>
             </div>
           )}
 
