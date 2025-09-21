@@ -5,7 +5,7 @@ import { getStorage } from '@/lib/appwrite';
 interface ImagePreviewProps {
   fileId: string;
   fileName: string;
-  fileType: "images" | "videos" | "docs" | "audio";
+  fileType: "images" | "videos" | "docs" | "audio" | "archives";
   className?: string;
 }
 
@@ -45,6 +45,8 @@ export default function ImagePreview({ fileId, fileName, fileType, className = "
         return <FileText className="w-4 h-4" />;
       case 'audio':
         return <Music className="w-4 h-4" />;
+      case 'archives':
+        return <Archive className="w-4 h-4" />;
       default:
         return <Archive className="w-4 h-4" />;
     }
