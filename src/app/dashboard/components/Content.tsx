@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -13,8 +14,8 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
-
+import { ArrowUpDown, ChevronDown, MoreHorizontal, Copy, Download, Share, Trash2, RotateCcw } from "lucide-react"
+import sadIllustration from "@/app/assets/sad-illustration.svg"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -38,6 +39,11 @@ import {
 import { NavigationItem } from "../page"
 import { useFiles, FileData } from "@/hooks/useFiles"
 import ImagePreview from "./ImagePreview"
+import DeleteConfirmDialog from "./DeleteConfirmDialog"
+import RecoverConfirmDialog from "./RecoverConfirmDialog"
+import PermanentDeleteConfirmDialog from "./PermanentDeleteConfirmDialog"
+import { downloadFile } from "@/lib/download"
+import { moveFileToTrash, restoreFileFromTrash, permanentlyDeleteFile } from "@/lib/delete"
 
 export type File = {
   id: string
@@ -136,22 +142,101 @@ export const columns: ColumnDef<FileData>[] = [
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
+            <Button variant="ghost" className="h-8 w-8 p-0 cursor-pointer">
               <span className="sr-only">Open menu</span>
               <MoreHorizontal />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(file.id)}
-            >
-              Copy file ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Download</DropdownMenuItem>
-            <DropdownMenuItem>Share</DropdownMenuItem>
-            <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+            
+            {file.isTrash ? (
+              // Trash file actions
+              <>
+                <DropdownMenuItem 
+                  className="cursor-pointer"
+                  onClick={() => navigator.clipboard.writeText(file.id)}
+                >
+                  <Copy className="w-4 h-4 mr-2" />
+                  Copy file ID
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  className="cursor-pointer text-green-600"
+                  onClick={() => {
+                    const event = new CustomEvent('recoverFile', { 
+                      detail: { fileId: file.id, fileName: file.fileName } 
+                    });
+                    window.dispatchEvent(event);
+                  }}
+                >
+                  <RotateCcw className="w-4 h-4 mr-2 text-green-600" />
+                  Recover
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="text-red-600 cursor-pointer"
+                  onClick={() => {
+                    const event = new CustomEvent('permanentDeleteFile', { 
+                      detail: { fileId: file.id, fileName: file.fileName } 
+                    });
+                    window.dispatchEvent(event);
+                  }}
+                >
+                  <Trash2 className="w-4 h-4 mr-2 text-red-600" />
+                  Delete Permanently
+                </DropdownMenuItem>
+              </>
+            ) : (
+              // Normal file actions
+              <>
+                <DropdownMenuItem 
+                  className="cursor-pointer"
+                  onClick={() => navigator.clipboard.writeText(file.id)}
+                >
+                  <Copy className="w-4 h-4 mr-2" />
+                  Copy file ID
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  className="cursor-pointer"
+                  onClick={async () => {
+                    try {
+                      await downloadFile(file.fileId, file.fileName);
+                    } catch (error) {
+                      console.error('Download failed:', error);
+                      alert('Failed to download file. Please try again.');
+                    }
+                  }}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="cursor-pointer"
+                  onClick={() => {
+                    // For now, just copy the file ID to clipboard for sharing
+                    navigator.clipboard.writeText(file.id);
+                    alert('File ID copied to clipboard for sharing');
+                  }}
+                >
+                  <Share className="w-4 h-4 mr-2" />
+                  Share
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="text-red-600 cursor-pointer"
+                  onClick={() => {
+                    // This will be handled by the parent component
+                    const event = new CustomEvent('deleteFile', { 
+                      detail: { fileId: file.id, fileName: file.fileName } 
+                    });
+                    window.dispatchEvent(event);
+                  }}
+                >
+                  <Trash2 className="w-4 h-4 mr-2 text-red-600" />
+                  Delete
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       )
@@ -171,8 +256,209 @@ export function ContentTable({ activeNavigation }: ContentTableProps) {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+  
+  // Delete confirmation dialog state
+  const [deleteDialog, setDeleteDialog] = React.useState<{
+    isOpen: boolean;
+    fileId: string | null;
+    fileName: string | null;
+    isLoading: boolean;
+  }>({
+    isOpen: false,
+    fileId: null,
+    fileName: null,
+    isLoading: false
+  });
 
-  const { files, loading } = useFiles(activeNavigation);
+  // Recover confirmation dialog state
+  const [recoverDialog, setRecoverDialog] = React.useState<{
+    isOpen: boolean;
+    fileId: string | null;
+    fileName: string | null;
+    isLoading: boolean;
+  }>({
+    isOpen: false,
+    fileId: null,
+    fileName: null,
+    isLoading: false
+  });
+
+  // Permanent delete confirmation dialog state
+  const [permanentDeleteDialog, setPermanentDeleteDialog] = React.useState<{
+    isOpen: boolean;
+    fileId: string | null;
+    fileName: string | null;
+    isLoading: boolean;
+  }>({
+    isOpen: false,
+    fileId: null,
+    fileName: null,
+    isLoading: false
+  });
+
+  const { files, loading, refetch } = useFiles(activeNavigation);
+
+  // Use useRef to store stable references
+  const refetchRef = React.useRef(refetch);
+  refetchRef.current = refetch;
+
+  // Handle delete file event
+  React.useEffect(() => {
+    const handleDeleteFile = (event: CustomEvent) => {
+      const { fileId, fileName } = event.detail;
+      setDeleteDialog({
+        isOpen: true,
+        fileId,
+        fileName,
+        isLoading: false
+      });
+    };
+
+    const handleRecoverFile = (event: CustomEvent) => {
+      const { fileId, fileName } = event.detail;
+      setRecoverDialog({
+        isOpen: true,
+        fileId,
+        fileName,
+        isLoading: false
+      });
+    };
+
+    const handlePermanentDeleteFile = (event: CustomEvent) => {
+      const { fileId, fileName } = event.detail;
+      setPermanentDeleteDialog({
+        isOpen: true,
+        fileId,
+        fileName,
+        isLoading: false
+      });
+    };
+
+    const handleFilesUpdated = () => {
+      console.log('ContentTable: Files updated event received, refetching...');
+      refetchRef.current();
+    };
+
+    window.addEventListener('deleteFile', handleDeleteFile as EventListener);
+    window.addEventListener('recoverFile', handleRecoverFile as EventListener);
+    window.addEventListener('permanentDeleteFile', handlePermanentDeleteFile as EventListener);
+    window.addEventListener('filesUpdated', handleFilesUpdated);
+    
+    return () => {
+      window.removeEventListener('deleteFile', handleDeleteFile as EventListener);
+      window.removeEventListener('recoverFile', handleRecoverFile as EventListener);
+      window.removeEventListener('permanentDeleteFile', handlePermanentDeleteFile as EventListener);
+      window.removeEventListener('filesUpdated', handleFilesUpdated);
+    };
+  }, []); // Empty dependency array - event listeners are stable
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteDialog.fileId) return;
+
+    setDeleteDialog(prev => ({ ...prev, isLoading: true }));
+
+    try {
+      await moveFileToTrash(deleteDialog.fileId);
+      // Refresh the files list
+      await refetch();
+      
+      // Dispatch filesUpdated event to update counts in sidebar
+      const filesUpdatedEvent = new CustomEvent('filesUpdated');
+      window.dispatchEvent(filesUpdatedEvent);
+      
+      setDeleteDialog({
+        isOpen: false,
+        fileId: null,
+        fileName: null,
+        isLoading: false
+      });
+    } catch (error) {
+      console.error('Delete failed:', error);
+      alert('Failed to delete file. Please try again.');
+      setDeleteDialog(prev => ({ ...prev, isLoading: false }));
+    }
+  };
+
+  const handleRecoverConfirm = async () => {
+    if (!recoverDialog.fileId) return;
+
+    setRecoverDialog(prev => ({ ...prev, isLoading: true }));
+
+    try {
+      await restoreFileFromTrash(recoverDialog.fileId);
+      // Refresh the files list
+      await refetch();
+      
+      // Dispatch filesUpdated event to update counts in sidebar
+      const filesUpdatedEvent = new CustomEvent('filesUpdated');
+      window.dispatchEvent(filesUpdatedEvent);
+      
+      setRecoverDialog({
+        isOpen: false,
+        fileId: null,
+        fileName: null,
+        isLoading: false
+      });
+    } catch (error) {
+      console.error('Recover failed:', error);
+      alert('Failed to recover file. Please try again.');
+      setRecoverDialog(prev => ({ ...prev, isLoading: false }));
+    }
+  };
+
+  const handlePermanentDeleteConfirm = async () => {
+    if (!permanentDeleteDialog.fileId) return;
+
+    setPermanentDeleteDialog(prev => ({ ...prev, isLoading: true }));
+
+    try {
+      await permanentlyDeleteFile(permanentDeleteDialog.fileId);
+      // Refresh the files list
+      await refetch();
+      
+      // Dispatch filesUpdated event to update counts in sidebar
+      const filesUpdatedEvent = new CustomEvent('filesUpdated');
+      window.dispatchEvent(filesUpdatedEvent);
+      
+      setPermanentDeleteDialog({
+        isOpen: false,
+        fileId: null,
+        fileName: null,
+        isLoading: false
+      });
+    } catch (error) {
+      console.error('Permanent delete failed:', error);
+      alert('Failed to permanently delete file. Please try again.');
+      setPermanentDeleteDialog(prev => ({ ...prev, isLoading: false }));
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialog({
+      isOpen: false,
+      fileId: null,
+      fileName: null,
+      isLoading: false
+    });
+  };
+
+  const handleRecoverCancel = () => {
+    setRecoverDialog({
+      isOpen: false,
+      fileId: null,
+      fileName: null,
+      isLoading: false
+    });
+  };
+
+  const handlePermanentDeleteCancel = () => {
+    setPermanentDeleteDialog({
+      isOpen: false,
+      fileId: null,
+      fileName: null,
+      isLoading: false
+    });
+  };
 
   const table = useReactTable({
     data: files,
@@ -282,9 +568,22 @@ export function ContentTable({ activeNavigation }: ContentTableProps) {
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
+                  className="h-96 text-center"
                 >
-                  No files found.
+                  <div className="flex flex-col items-center justify-center space-y-6">
+                    <Image
+                      src={sadIllustration}
+                      width={192} height={192} className="w-48 h-48 object-contain" alt="No files found" />
+                    <div className="space-y-2 flex flex-col items-center justify-center m-auto">
+                      <h3 className="text-lg font-semibold text-gray-700">
+                        No files found
+                      </h3>
+                      <div className="text-sm text-gray-500 max-w-md text-center flex flex-col items-center leading-[1.5rem] mt-3">
+                        <p className="text-center">You don't have any files yet.</p>
+                        <p className="text-center">Click on the upload button above to start uploading your files and get started!</p>
+                      </div>
+                    </div>
+                  </div>
                 </TableCell>
               </TableRow>
             )}
@@ -315,6 +614,33 @@ export function ContentTable({ activeNavigation }: ContentTableProps) {
           </Button>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        fileName={deleteDialog.fileName || ''}
+        isLoading={deleteDialog.isLoading}
+      />
+
+      {/* Recover Confirmation Dialog */}
+      <RecoverConfirmDialog
+        isOpen={recoverDialog.isOpen}
+        onClose={handleRecoverCancel}
+        onConfirm={handleRecoverConfirm}
+        fileName={recoverDialog.fileName || ''}
+        isLoading={recoverDialog.isLoading}
+      />
+
+      {/* Permanent Delete Confirmation Dialog */}
+      <PermanentDeleteConfirmDialog
+        isOpen={permanentDeleteDialog.isOpen}
+        onClose={handlePermanentDeleteCancel}
+        onConfirm={handlePermanentDeleteConfirm}
+        fileName={permanentDeleteDialog.fileName || ''}
+        isLoading={permanentDeleteDialog.isLoading}
+      />
     </div>
   )
 }
