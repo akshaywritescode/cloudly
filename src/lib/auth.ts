@@ -13,7 +13,7 @@ export const getCurrentUser = async () => {
 export const updateUserName = async (newName: string, password: string) => {
   try {
     const account = getAccount();
-    await account.updateName(newName, password);
+    await account.updateName(newName);
     return { success: true, message: "Name updated successfully" };
   } catch (error: any) {
     console.error("Error updating name:", error);
