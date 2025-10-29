@@ -40,9 +40,6 @@ export const uploadProfilePicture = async (file: File): Promise<ProfilePictureUp
       return { success: false, message: 'User not authenticated' };
     }
 
-    // Create a unique filename with user ID and timestamp
-    const fileExtension = file.name.split('.').pop();
-
     // Upload the file
     const response = await storage.createFile(
       bucketId,
