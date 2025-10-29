@@ -52,7 +52,7 @@ export const updateUserProfile = async (updates: {
     const results = [];
     
     if (updates.name) {
-      const nameResult = await updateUserName(updates.name, currentPassword);
+      const nameResult = await updateUserName(updates.name);
       results.push({ field: 'name', ...nameResult });
     }
     
@@ -116,6 +116,7 @@ export const getActiveDevices = async (): Promise<Device[]> => {
   try {
     const account = getAccount();
     const sessions = await account.listSessions();
+    const currentSession = await account.getSession('current');
     
     const devices: Device[] = sessions.sessions.map((session: any) => {
       const userAgent = session.userAgent || '';
@@ -126,8 +127,8 @@ export const getActiveDevices = async (): Promise<Device[]> => {
         name: deviceInfo.name,
         type: deviceInfo.type,
         location: deviceInfo.location,
-        lastActive: new Date(session.current).toLocaleString(),
-        isCurrent: session.current === session.$id,
+        lastActive: new Date(session.$updatedAt).toLocaleString(),
+        isCurrent: session.$id === currentSession.$id,
         userAgent: userAgent
       };
     });
@@ -154,9 +155,10 @@ export const terminateAllOtherSessions = async () => {
   try {
     const account = getAccount();
     const sessions = await account.listSessions();
+    const currentSession = await account.getSession('current');
     
     const otherSessions = sessions.sessions.filter((session: any) => 
-      session.$id !== sessions.current
+      session.$id !== currentSession.$id
     );
     
     for (const session of otherSessions) {
