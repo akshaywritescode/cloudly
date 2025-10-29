@@ -29,7 +29,7 @@ export function WrongMailDialog() {
       await account.updateEmail(newEmail, oldPassword);
       localStorage.setItem('verify-email', newEmail);
       setMessage("Updated Successfully, Resending mail..")
-      await account.createVerification(`${window.location.origin}/auth/verify-account`);
+      await account.createVerification(`${window.location.origin}/verify-account`);
       window.location.reload();
     } catch (err: any) {
       setError(`${err.message}`);
