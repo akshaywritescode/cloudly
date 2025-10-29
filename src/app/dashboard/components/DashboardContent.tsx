@@ -5,6 +5,8 @@ import { NavigationItem } from "../page";
 import UploadDialog from "./UploadDialog";
 import { useFileCounts } from "@/hooks/useFileCounts";
 import { useFolders } from "@/hooks/useFolders";
+import { useSearch } from "@/hooks/useSearch";
+import SearchResults from "./SearchResults";
 
 interface DashboardContentProps {
   activeNavigation: NavigationItem;
@@ -13,6 +15,7 @@ interface DashboardContentProps {
 export default function DashboardContent({ activeNavigation }: DashboardContentProps){
     const { refetch: refetchCounts } = useFileCounts();
     const { refetch: refetchFolders } = useFolders();
+    const { isSearchActive } = useSearch();
 
     const handleUploadComplete = async () => {
         console.log('Upload completed, refreshing data...');
@@ -35,6 +38,11 @@ export default function DashboardContent({ activeNavigation }: DashboardContentP
             console.error('Error refreshing after upload:', error);
         }
     };
+
+    // Show search results when search is active
+    if (isSearchActive) {
+        return <SearchResults />;
+    }
 
     return <main className="p-6">
         {/* Content Detail */}

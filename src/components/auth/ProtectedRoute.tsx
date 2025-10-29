@@ -17,50 +17,60 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
     useEffect(() => {
         const checkAuth = async () => {
-            const user = await getCurrentUser();
-
-            if (!user) {
-                router.replace("/login");
-                return;
-            }
-
-            if (!user.emailVerification) {
-                localStorage.setItem("verify-email", user.email);
-                const account = getAccount();
-                await account.createVerification(`${window.location.origin}/verify-account`);
-                router.replace("/sent-verify-mail");
-                return;
-            }
-
-            // Skip onboarding check on onboarding page
-            if (pathname === "/onboarding") {
-                setIsLoading(false);
-                return;
-            }
-
-            // Check onboarding status
-            const databases = getDatabase();
             try {
-                const res = await databases.listDocuments(
-                    databaseId,
-                    collectionId,
-                    [Query.equal("userId", user.$id)]
-                );
+                const user = await getCurrentUser();
 
-                const metadata = res.documents[0];
-
-                if (!metadata?.onboardingCompleted) {
-                    router.replace("/onboarding");
+                if (!user) {
+                    router.replace("/login");
+                    setIsLoading(false);
                     return;
                 }
 
-            } catch (err) {
-                console.error("Failed to fetch user metadata:", err);
-                router.replace("/onboarding");
-                return;
-            }
+                if (!user.emailVerification) {
+                    localStorage.setItem("verify-email", user.email);
+                    const account = getAccount();
+                    await account.createVerification(`${window.location.origin}/verify-account`);
+                    router.replace("/sent-verify-mail");
+                    setIsLoading(false);
+                    return;
+                }
 
-            setIsLoading(false);
+                // Skip onboarding check on onboarding page
+                if (pathname === "/onboarding") {
+                    setIsLoading(false);
+                    return;
+                }
+
+                // Check onboarding status
+                const databases = getDatabase();
+                try {
+                    const res = await databases.listDocuments(
+                        databaseId,
+                        collectionId,
+                        [Query.equal("userId", user.$id)]
+                    );
+
+                    const metadata = res.documents[0];
+
+                    if (!metadata?.onboardingCompleted) {
+                        router.replace("/onboarding");
+                        setIsLoading(false);
+                        return;
+                    }
+
+                } catch (err) {
+                    console.error("Failed to fetch user metadata:", err);
+                    router.replace("/onboarding");
+                    setIsLoading(false);
+                    return;
+                }
+
+                setIsLoading(false);
+            } catch (error) {
+                console.error("Authentication check failed:", error);
+                router.replace("/login");
+                setIsLoading(false);
+            }
         };
 
         checkAuth();
