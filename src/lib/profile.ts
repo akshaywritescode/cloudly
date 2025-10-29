@@ -42,7 +42,6 @@ export const uploadProfilePicture = async (file: File): Promise<ProfilePictureUp
 
     // Create a unique filename with user ID and timestamp
     const fileExtension = file.name.split('.').pop();
-    const fileName = `profile_${user.$id}_${Date.now()}.${fileExtension}`;
 
     // Upload the file
     const response = await storage.createFile(
