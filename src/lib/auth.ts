@@ -10,7 +10,7 @@ export const getCurrentUser = async () => {
   }
 };
 
-export const updateUserName = async (newName: string, password: string) => {
+export const updateUserName = async (newName: string) => {
   try {
     const account = getAccount();
     await account.updateName(newName);
