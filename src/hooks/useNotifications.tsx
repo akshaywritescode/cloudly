@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { getUserNotifications, clearNotifications, NotificationData } from '@/lib/notifications';
+import { getUserNotifications, clearNotifications } from '@/lib/notifications';
 
 interface NotificationContextType {
   notificationCount: number;

@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Settings, User, Shield, Save, Camera, Upload, Lock, Eye, EyeOff, Mail, Monitor, Smartphone, Tablet, Trash2, AlertTriangle } from "lucide-react";
 import { updateUserProfile, updateUserPassword, initiateEmailVerification, getActiveDevices, terminateSession, terminateAllOtherSessions, Device } from "@/lib/auth";
-import { uploadProfilePicture, deleteProfilePicture, getProfilePicturePreview, getUserProfilePicture, ProfilePictureUploadResult } from "@/lib/profile";
+import { uploadProfilePicture, deleteProfilePicture, getUserProfilePicture, ProfilePictureUploadResult } from "@/lib/profile";
 import { useRouter } from "next/navigation";
 
 interface SettingsDialogProps {

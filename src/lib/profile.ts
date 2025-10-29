@@ -1,4 +1,4 @@
-import { getStorage, getClient, getDatabase } from './appwrite';
+import { getStorage, getDatabase } from './appwrite';
 import { getCurrentUser } from './auth';
 
 // Get profile bucket ID from environment
