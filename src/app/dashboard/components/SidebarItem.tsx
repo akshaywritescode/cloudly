@@ -25,25 +25,32 @@ export default function SidebarItem({ icon, label, count, isActive, onClick }: S
   // Avoid rendering theme-based class until mounted
   const themeClass = !mounted ? "" : theme === "light" ? "text-black" : "text-white/80";
 
-  return (
-    <div
-      className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors select-none ${isActive
-        ? 'bg-blue-50 text-blue-700 border border-blue-200'
-        : `hover:bg-gray-50 hover:text-black ${themeClass}`
+    return (
+      <div
+        className={`group flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors select-none ${
+          isActive
+            ? 'bg-blue-50 text-blue-700 border border-blue-200'
+            : `hover:bg-gray-50 hover:text-black ${themeClass}`
         }`}
-      onClick={onClick}
-    >
-      <div className="flex items-center gap-3">
-        <div className={`w-5 h-5 ${isActive ? 'text-blue-700' : `${themeClass}`}`}>
-          {icon}
+        onClick={onClick}
+      >
+        <div className="flex items-center gap-3">
+          <div
+            className={`w-5 h-5 ${
+              isActive
+                ? 'text-blue-700'
+                : `${themeClass} group-hover:text-black`
+            }`}
+          >
+            {icon}
+          </div>
+          <span className="font-medium text-sm">{label}</span>
         </div>
-        <span className="font-medium text-sm">{label}</span>
+        {count !== undefined && (
+          <span className="min-w-5 min-h-5 w-5.5 h-5.5 flex items-center justify-center text-xs text-white bg-blue-600 px-2 py-1 rounded-full">
+            {count}
+          </span>
+        )}
       </div>
-      {count !== undefined && (
-        <span className="min-w-5 min-h-5 w-5.5 h-5.5 flex items-center justify-center text-xs text-white bg-blue-700 px-2 py-1 rounded-full">
-          {count}
-        </span>
-      )}
-    </div>
-  );
+    );
 }
