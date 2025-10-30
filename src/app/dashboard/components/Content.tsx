@@ -57,47 +57,46 @@ export type File = {
   dateTime: string
 }
 
-export const columns: ColumnDef<FileData>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "fileName",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          File Name
-          <ArrowUpDown />
-        </Button>
-      )
+function getColumns(setPreviewFile: (file: FileData) => void): ColumnDef<FileData>[] {
+  return [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
     },
-    cell: ({ row }) => {
-      const file = row.original;
-      const [previewOpen, setPreviewOpen] = React.useState(false);
-      return (
-        <>
+    {
+      accessorKey: "fileName",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            File Name
+            <ArrowUpDown />
+          </Button>
+        )
+      },
+      cell: ({ row }) => {
+        const file = row.original;
+        return (
           <div className="flex items-center gap-3">
             <ImagePreview 
               fileId={file.fileId} 
@@ -107,192 +106,155 @@ export const columns: ColumnDef<FileData>[] = [
             />
             <button
               className="font-medium underline hover:opacity-80 focus:outline-none"
-              onClick={() => setPreviewOpen(true)}
+              onClick={() => setPreviewFile(file)}
               title="Preview file"
               type="button"
             >
               {file.fileName}
             </button>
           </div>
-          <FilePreviewDialog
-            open={previewOpen}
-            onOpenChange={setPreviewOpen}
-            fileId={file.fileId}
-            fileName={file.fileName}
-            fileType={file.fileType}
-          />
-        </>
-      );
+        );
+      }
     },
-  },
-  {
-    accessorKey: "fileType",
-    header: "Type",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("fileType")}</div>
-    ),
-  },
-  {
-    accessorKey: "fileSize",
-    header: () => <div className="text-right">Size</div>,
-    cell: ({ row }) => {
-      return <div className="text-right font-medium">{row.getValue("fileSize")}</div>
+    {
+      accessorKey: "fileType",
+      header: "Type",
+      cell: ({ row }) => (
+        <div className="capitalize">{row.getValue("fileType")}</div>
+      ),
     },
-  },
-  {
-    accessorKey: "uploadDate",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Date & Time
-          <ArrowUpDown />
-        </Button>
-      )
+    {
+      accessorKey: "fileSize",
+      header: () => <div className="text-right">Size</div>,
+      cell: ({ row }) => {
+        return <div className="text-right font-medium">{row.getValue("fileSize")}</div>
+      },
     },
-    cell: ({ row }) => <div>{row.getValue("uploadDate")}</div>,
-  },
-  {
-    id: "actions",
-    enableHiding: false,
-    cell: ({ row }) => {
-      const file = row.original
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0 cursor-pointer">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            
-            {file.isTrash ? (
-              // Trash file actions
-              <>
-                <DropdownMenuItem 
-                  className="cursor-pointer"
-                  onClick={() => navigator.clipboard.writeText(file.id)}
-                >
-                  <Copy className="w-4 h-4 mr-2" />
-                  Copy file ID
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  className="cursor-pointer text-green-600"
-                  onClick={() => {
-                    const event = new CustomEvent('recoverFile', { 
-                      detail: { fileId: file.id, fileName: file.fileName } 
-                    });
-                    window.dispatchEvent(event);
-                  }}
-                >
-                  <RotateCcw className="w-4 h-4 mr-2 text-green-600" />
-                  Recover
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="text-red-600 cursor-pointer"
-                  onClick={() => {
-                    const event = new CustomEvent('permanentDeleteFile', { 
-                      detail: { fileId: file.id, fileName: file.fileName } 
-                    });
-                    window.dispatchEvent(event);
-                  }}
-                >
-                  <Trash2 className="w-4 h-4 mr-2 text-red-600" />
-                  Delete Permanently
-                </DropdownMenuItem>
-              </>
-            ) : (
-              // Normal file actions
-              <>
-                <DropdownMenuItem 
-                  className="cursor-pointer"
-                  onClick={() => navigator.clipboard.writeText(file.id)}
-                >
-                  <Copy className="w-4 h-4 mr-2" />
-                  Copy file ID
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  className="cursor-pointer"
-                  onClick={async () => {
-                    try {
-                      await toggleStarFile(file.id, !file.isStarred);
-                      // Refresh the files list
-                      const event = new CustomEvent('filesUpdated');
+    {
+      accessorKey: "uploadDate",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Date & Time
+            <ArrowUpDown />
+          </Button>
+        )
+      },
+      cell: ({ row }) => <div>{row.getValue("uploadDate")}</div>,
+    },
+    {
+      id: "actions",
+      enableHiding: false,
+      cell: ({ row }) => {
+        const file = row.original
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0 cursor-pointer">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              {
+                file.isTrash ? (
+                  // Trash file actions
+                  <>
+                    <DropdownMenuItem className="cursor-pointer" onClick={() => navigator.clipboard.writeText(file.id)}>
+                      <Copy className="w-4 h-4 mr-2" />
+                      Copy file ID
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="cursor-pointer text-green-600" onClick={() => {
+                      const event = new CustomEvent('recoverFile', {
+                        detail: { fileId: file.id, fileName: file.fileName }
+                      });
                       window.dispatchEvent(event);
-                    } catch (error) {
-                      console.error('Failed to toggle star:', error);
-                      alert('Failed to update star status. Please try again.');
-                    }
-                  }}
-                >
-                  <Star className={`w-4 h-4 mr-2 ${file.isStarred ? 'fill-yellow-400 text-yellow-400' : ''}`} />
-                  {file.isStarred ? 'Unstar' : 'Star'}
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="cursor-pointer"
-                  onClick={() => {
-                    const event = new CustomEvent('renameFile', { 
-                      detail: { fileId: file.id, fileName: file.fileName } 
-                    });
-                    window.dispatchEvent(event);
-                  }}
-                >
-                  <Pencil className="w-4 h-4 mr-2" />
-                  Rename
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="cursor-pointer"
-                  onClick={async () => {
-                    try {
-                      await downloadFile(file.fileId, file.fileName);
-                    } catch (error) {
-                      console.error('Download failed:', error);
-                      alert('Failed to download file. Please try again.');
-                    }
-                  }}
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Download
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="cursor-pointer"
-                  onClick={() => {
-                    // For now, just copy the file ID to clipboard for sharing
-                    navigator.clipboard.writeText(file.id);
-                    alert('File ID copied to clipboard for sharing');
-                  }}
-                >
-                  <Share className="w-4 h-4 mr-2" />
-                  Share
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="text-red-600 cursor-pointer"
-                  onClick={() => {
-                    // This will be handled by the parent component
-                    const event = new CustomEvent('deleteFile', { 
-                      detail: { fileId: file.id, fileName: file.fileName } 
-                    });
-                    window.dispatchEvent(event);
-                  }}
-                >
-                  <Trash2 className="w-4 h-4 mr-2 text-red-600" />
-                  Delete
-                </DropdownMenuItem>
-              </>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
+                    }}>
+                      <RotateCcw className="w-4 h-4 mr-2 text-green-600" />
+                      Recover
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-red-600 cursor-pointer" onClick={() => {
+                      const event = new CustomEvent('permanentDeleteFile', {
+                        detail: { fileId: file.id, fileName: file.fileName }
+                      });
+                      window.dispatchEvent(event);
+                    }}>
+                      <Trash2 className="w-4 h-4 mr-2 text-red-600" />
+                      Delete Permanently
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  // Normal file actions
+                  <>
+                    <DropdownMenuItem className="cursor-pointer" onClick={() => navigator.clipboard.writeText(file.id)}>
+                      <Copy className="w-4 h-4 mr-2" />
+                      Copy file ID
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="cursor-pointer" onClick={async () => {
+                      try {
+                        await toggleStarFile(file.id, !file.isStarred);
+                        const event = new CustomEvent('filesUpdated');
+                        window.dispatchEvent(event);
+                      } catch (error) {
+                        console.error('Failed to toggle star:', error);
+                        alert('Failed to update star status. Please try again.');
+                      }
+                    }}>
+                      <Star className={`w-4 h-4 mr-2 ${file.isStarred ? 'fill-yellow-400 text-yellow-400' : ''}`} />
+                      {file.isStarred ? 'Unstar' : 'Star'}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer" onClick={() => {
+                      const event = new CustomEvent('renameFile', {
+                        detail: { fileId: file.id, fileName: file.fileName }
+                      });
+                      window.dispatchEvent(event);
+                    }}>
+                      <Pencil className="w-4 h-4 mr-2" />
+                      Rename
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer" onClick={async () => {
+                      try {
+                        await downloadFile(file.fileId, file.fileName);
+                      } catch (error) {
+                        console.error('Download failed:', error);
+                        alert('Failed to download file. Please try again.');
+                      }
+                    }}>
+                      <Download className="w-4 h-4 mr-2" />
+                      Download
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer" onClick={() => {
+                      navigator.clipboard.writeText(file.id);
+                      alert('File ID copied to clipboard for sharing');
+                    }}>
+                      <Share className="w-4 h-4 mr-2" />
+                      Share
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-red-600 cursor-pointer" onClick={() => {
+                      const event = new CustomEvent('deleteFile', {
+                        detail: { fileId: file.id, fileName: file.fileName }
+                      });
+                      window.dispatchEvent(event);
+                    }}>
+                      <Trash2 className="w-4 h-4 mr-2 text-red-600" />
+                      Delete
+                    </DropdownMenuItem>
+                  </>
+                )
+              }
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      }
     },
-  },
-]
+  ];
+}
 
 interface ContentTableProps {
   activeNavigation: NavigationItem;
@@ -360,6 +322,9 @@ export function ContentTable({ activeNavigation }: ContentTableProps) {
   });
 
   const { files, loading, refetch } = useFiles(activeNavigation);
+
+  // generate columns with current setPreviewFile
+  const columns = React.useMemo(() => getColumns(setPreviewFile), [setPreviewFile]);
 
   // Use useRef to store stable references
   const refetchRef = React.useRef(refetch);
