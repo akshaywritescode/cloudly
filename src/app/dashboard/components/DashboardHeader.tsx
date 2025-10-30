@@ -14,6 +14,7 @@ import SettingsDialog from './SettingsDialog';
 import NotificationDropdown from './NotificationDropdown';
 import ThemeSwitcher from './ThemeSwitcher';
 import { Card } from '@/components/ui/card';
+import Heading1 from '@/components/Heading1';
 
 
 interface User {
@@ -150,9 +151,9 @@ export default function DashboardHeader() {
             {/* User Profile Dropdown */}
             <div className="flex items-center gap-3">
               <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">
+                <Heading1 className="text-sm font-medium text-gray-900">
                   {user?.name || 'Loading...'}
-                </p>
+                </Heading1>
                 <p className="text-xs text-gray-500">
                   {user?.email || ''}
                 </p>

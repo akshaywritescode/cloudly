@@ -18,6 +18,8 @@ import SidebarSection from './SidebarSection';
 import { useFileCounts } from '@/hooks/useFileCounts';
 import { useFolders } from '@/hooks/useFolders';
 import { useEffect, useRef } from 'react';
+import CloudlyLogo from "@/components/CloudlyLogo";
+import Separator from "@/components/Separator";
 
 interface SidebarProps {
   activeNavigation: NavigationItem;
@@ -163,12 +165,13 @@ export default function Sidebar({ activeNavigation, onNavigationChange }: Sideba
   return (
     <div className="w-full h-full flex flex-col select-none">
       {/* Logo Section */}
-      <div className="flex w-full items-center justify-center p-4 border-b border-gray-200">
+      <div className="flex w-full items-center justify-center p-4">
         <div className="flex items-center gap-2">
-          <Cloud className="w-8 h-8 text-blue-600" />
-          <span className="font-medium text-2xl text-gray-800">Cloudly</span>
+          <CloudlyLogo />
         </div>
+        
       </div>
+      <Separator className="w-full mt-1.5" />
 
       {/* Navigation Sections */}
       <div className="flex-1 overflow-y-auto mt-5 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400 select-none">

@@ -46,6 +46,7 @@ import RenameDialog from "./RenameDialog"
 import { downloadFile } from "@/lib/download"
 import { moveFileToTrash, restoreFileFromTrash, permanentlyDeleteFile } from "@/lib/delete"
 import { renameFile, toggleStarFile } from "@/lib/files"
+import Heading2 from "@/components/Heading2"
 
 export type File = {
   id: string
@@ -667,9 +668,9 @@ export function ContentTable({ activeNavigation }: ContentTableProps) {
                       src={sadIllustration}
                       width={192} height={192} className="w-48 h-48 object-contain" alt="No files found" />
                     <div className="space-y-2 flex flex-col items-center justify-center m-auto">
-                      <h3 className="text-lg font-semibold text-gray-700">
+                      <Heading2 className="text-lg font-semibold text-gray-700">
                         No files found
-                      </h3>
+                      </Heading2>
                       <div className="text-sm text-gray-500 max-w-md text-center flex flex-col items-center leading-[1.5rem] mt-3">
                         <p className="text-center">You don't have any files yet.</p>
                         <p className="text-center">Click on the upload button above to start uploading your files and get started!</p>
