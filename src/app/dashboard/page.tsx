@@ -64,7 +64,7 @@ export default function Dashboard() {
                 <ResizableHandle />
 
                 <ResizablePanel defaultSize={85}>
-                  <div className="h-full p-1">
+                  <div className="h-full p-1 overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
                     <DashboardHeader />
                     <DashboardContent activeNavigation={activeNavigation} />
                   </div>
