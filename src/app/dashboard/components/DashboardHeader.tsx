@@ -116,7 +116,7 @@ export default function DashboardHeader() {
 
   return (
     <>
-      <Card className="w-[99%] m-auto border-b px-6 py-4">
+      <Card className="w-[99%] m-auto border-b px-6 py-4 mt-2">
         <div className="flex items-center justify-between">
           {/* Search Bar */}
           <div className="">
@@ -141,7 +141,6 @@ export default function DashboardHeader() {
             </form>
           </div>
 
-          <ThemeSwitcher defaultValue="dark" />
 
           {/* Right Side Actions */}
           <div className="flex items-center gap-4">
@@ -160,7 +159,7 @@ export default function DashboardHeader() {
               </div>
 
               {/* User Avatar */}
-              <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+              <div className="mr-3 w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
                 {user?.profilePicture ? (
                   <img
                     src={user.profilePicture}
@@ -171,6 +170,8 @@ export default function DashboardHeader() {
                   <User className="w-4 h-4 text-gray-600" />
                 )}
               </div>
+
+              <ThemeSwitcher defaultValue="dark" />
 
               {/* Settings */}
               <Button
