@@ -106,7 +106,7 @@ export const columns: ColumnDef<FileData>[] = [
               className="w-8 h-8"
             />
             <button
-              className="font-medium text-black underline hover:opacity-80 focus:outline-none"
+              className="font-medium underline hover:opacity-80 focus:outline-none"
               onClick={() => setPreviewOpen(true)}
               title="Preview file"
               type="button"
@@ -300,13 +300,13 @@ interface ContentTableProps {
 
 export function ContentTable({ activeNavigation }: ContentTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  )
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
-  
+
+  // Dialog states
+  const [previewFile, setPreviewFile] = React.useState<FileData | null>(null);
+
   // Delete confirmation dialog state
   const [deleteDialog, setDeleteDialog] = React.useState<{
     isOpen: boolean;
@@ -760,6 +760,13 @@ export function ContentTable({ activeNavigation }: ContentTableProps) {
         onConfirm={handleRenameConfirm}
         currentFileName={renameDialog.fileName || ''}
         isLoading={renameDialog.isLoading}
+      />
+      <FilePreviewDialog
+        open={!!previewFile}
+        onOpenChange={open => !open ? setPreviewFile(null) : void 0}
+        fileId={previewFile?.fileId || ''}
+        fileName={previewFile?.fileName || ''}
+        fileType={previewFile?.fileType || 'images'}
       />
     </div>
   )
