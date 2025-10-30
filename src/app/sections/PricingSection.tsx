@@ -10,7 +10,7 @@ export default function PricingSection() {
     const [isMonthly, setIsMonthly] = useState(false)
 
 
-    return <section className="my-28 px-4 flex flex-col items-center ">
+    return <section className="my-28 px-4 flex flex-col items-center" id="pricing-section">
         <div className="flex flex-col items-center">
             <h2 className={`px-3 text-2xl tracking-wide text-center font-medium md:text-3xl lg:text-4xl lg:leading-[3.8rem] lg:w-[80%] ${montserrat.className}`}>Choose one of our core plans</h2>
             <p className="mt-7 text-center font-regulat text-sm text-black/60">Looking for advanced features? Check out our latest Growth plans or get a taste with our Free plan</p>

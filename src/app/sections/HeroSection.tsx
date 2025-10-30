@@ -22,10 +22,8 @@ export default function HeroSection() {
                         Bring your entire workflow together on one integrated platform that works with the tools you already use. 
                         Edit PDFs, share videos, sign documents and collaborate seamlessly with internal and external stakeholders – all without leaving Cloudly.
                     </p>
-                    <Button className="btn-primary w-full md:w-56">
-                        Get started now <ArrowRight className="ml-5" />
-                    </Button>
-                    <Link href={"#"} className="text-white underline underline-offset-2 flex gap-3 font-medium">
+                    <Link href={"/signup"} className="flex items-center"><Button className="btn-primary w-full md:w-56">Get started now <ArrowRight className="ml-2" /></Button></Link>
+                    <Link href={"/login"} className="text-white underline underline-offset-2 flex gap-3 font-medium">
                         Already have a Cloudly account? Sign in here <ArrowRight className="w-5" />
                     </Link>
                 </div>
