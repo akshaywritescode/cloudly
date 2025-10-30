@@ -15,6 +15,8 @@ import { Settings, User, Shield, Save, Camera, Upload, Lock, Eye, EyeOff, Mail, 
 import { updateUserProfile, updateUserPassword, initiateEmailVerification, getActiveDevices, terminateSession, terminateAllOtherSessions, Device } from "@/lib/auth";
 import { uploadProfilePicture, deleteProfilePicture, getUserProfilePicture, ProfilePictureUploadResult } from "@/lib/profile";
 import { useRouter } from "next/navigation";
+import Heading1 from '@/components/Heading1';
+import Heading2 from '@/components/Heading2';
 
 interface SettingsDialogProps {
   isOpen: boolean;
@@ -357,8 +359,8 @@ export default function SettingsDialog({
       <DialogContent className='w-[32rem] max-h-[90vh]'>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-black">
-            <Settings className="w-5 h-5" />
-            Settings
+            <Settings className="w-5 h-5 text-gray-400" />
+            <Heading1>Settings</Heading1>
           </DialogTitle>
           <DialogDescription>
             Manage your account settings and preferences.
@@ -530,8 +532,8 @@ export default function SettingsDialog({
                 {/* Password Change Section */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
-                    <Lock className="w-5 h-5 text-gray-600" />
-                    <h3 className="text-lg font-medium text-gray-900">Change Password</h3>
+                    <Lock className="w-5 h-5 text-gray-400" />
+                    <Heading1 className="text-lg font-medium text-gray-900">Change Password</Heading1>
                   </div>
                   
                   <div className="space-y-4">
@@ -623,8 +625,8 @@ export default function SettingsDialog({
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Monitor className="w-5 h-5 text-gray-600" />
-                      <h3 className="text-lg font-medium text-gray-900">Active Devices</h3>
+                      <Monitor className="w-5 h-5 text-gray-400" />
+                      <Heading1 className="text-lg font-medium">Active Devices</Heading1>
                     </div>
                     <Button
                       variant="outline"
@@ -658,7 +660,7 @@ export default function SettingsDialog({
                             </div>
                             <div>
                               <div className="flex items-center gap-2">
-                                <p className="font-medium text-gray-900">{device.name}</p>
+                                <Heading2 className="font-medium">{device.name}</Heading2>
                                 {device.isCurrent && (
                                   <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
                                     Current
