@@ -8,7 +8,7 @@ type THeading = {
     children: ReactNode
 };
 
-export default function ({ className, children }: THeading) {
+export default function Heading2({ className, children }: THeading) {
     const { theme } = useTheme();
     const [mounted, setMounted] = useState(false);
 

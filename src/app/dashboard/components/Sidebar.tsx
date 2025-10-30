@@ -1,7 +1,6 @@
 'use client';
 
 import { 
-  Cloud, 
   Images, 
   Video, 
   FileText, 
