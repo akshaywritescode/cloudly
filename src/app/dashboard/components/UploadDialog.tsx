@@ -248,7 +248,7 @@ export default function UploadDialog({ onUploadComplete }: UploadDialogProps) {
                     <div className="flex items-center gap-2">
                       <File className="w-4 h-4 text-gray-500" />
                       <div>
-                        <p className="text-sm font-medium">{file.name}</p>
+                        <p className="text-sm font-medium text-black">{file.name}</p>
                         <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
                       </div>
                     </div>
@@ -258,7 +258,7 @@ export default function UploadDialog({ onUploadComplete }: UploadDialogProps) {
                       onClick={() => removeFile(index)}
                       className="h-6 w-6 p-0"
                     >
-                      <X className="w-3 h-3" />
+                      <X className="w-3 h-3 text-gray-400" />
                     </Button>
                   </div>
                 ))}
