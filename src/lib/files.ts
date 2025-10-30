@@ -136,3 +136,19 @@ export async function deleteFileRecord(fileId: string) {
     throw error;
   }
 }
+
+export async function renameFile(fileId: string, newFileName: string) {
+  try {
+    const database = getDatabase();
+    const response = await database.updateDocument(
+      DATABASE_ID,
+      COLLECTION_ID,
+      fileId,
+      { fileName: newFileName }
+    );
+    return response;
+  } catch (error) {
+    console.error('Error renaming file:', error);
+    throw error;
+  }
+}

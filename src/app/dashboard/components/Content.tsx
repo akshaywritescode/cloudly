@@ -14,7 +14,7 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal, Copy, Download, Share, Trash2, RotateCcw } from "lucide-react"
+import { ArrowUpDown, ChevronDown, MoreHorizontal, Copy, Download, Share, Trash2, RotateCcw, Pencil } from "lucide-react"
 import sadIllustration from "@/app/assets/sad-illustration.svg"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -42,8 +42,10 @@ import ImagePreview from "./ImagePreview"
 import DeleteConfirmDialog from "./DeleteConfirmDialog"
 import RecoverConfirmDialog from "./RecoverConfirmDialog"
 import PermanentDeleteConfirmDialog from "./PermanentDeleteConfirmDialog"
+import RenameDialog from "./RenameDialog"
 import { downloadFile } from "@/lib/download"
 import { moveFileToTrash, restoreFileFromTrash, permanentlyDeleteFile } from "@/lib/delete"
+import { renameFile } from "@/lib/files"
 
 export type File = {
   id: string
@@ -199,6 +201,18 @@ export const columns: ColumnDef<FileData>[] = [
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
                   className="cursor-pointer"
+                  onClick={() => {
+                    const event = new CustomEvent('renameFile', { 
+                      detail: { fileId: file.id, fileName: file.fileName } 
+                    });
+                    window.dispatchEvent(event);
+                  }}
+                >
+                  <Pencil className="w-4 h-4 mr-2" />
+                  Rename
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="cursor-pointer"
                   onClick={async () => {
                     try {
                       await downloadFile(file.fileId, file.fileName);
@@ -296,6 +310,19 @@ export function ContentTable({ activeNavigation }: ContentTableProps) {
     isLoading: false
   });
 
+  // Rename dialog state
+  const [renameDialog, setRenameDialog] = React.useState<{
+    isOpen: boolean;
+    fileId: string | null;
+    fileName: string | null;
+    isLoading: boolean;
+  }>({
+    isOpen: false,
+    fileId: null,
+    fileName: null,
+    isLoading: false
+  });
+
   const { files, loading, refetch } = useFiles(activeNavigation);
 
   // Use useRef to store stable references
@@ -334,6 +361,16 @@ export function ContentTable({ activeNavigation }: ContentTableProps) {
       });
     };
 
+    const handleRenameFile = (event: CustomEvent) => {
+      const { fileId, fileName } = event.detail;
+      setRenameDialog({
+        isOpen: true,
+        fileId,
+        fileName,
+        isLoading: false
+      });
+    };
+
     const handleFilesUpdated = () => {
       console.log('ContentTable: Files updated event received, refetching...');
       refetchRef.current();
@@ -342,12 +379,14 @@ export function ContentTable({ activeNavigation }: ContentTableProps) {
     window.addEventListener('deleteFile', handleDeleteFile as EventListener);
     window.addEventListener('recoverFile', handleRecoverFile as EventListener);
     window.addEventListener('permanentDeleteFile', handlePermanentDeleteFile as EventListener);
+    window.addEventListener('renameFile', handleRenameFile as EventListener);
     window.addEventListener('filesUpdated', handleFilesUpdated);
     
     return () => {
       window.removeEventListener('deleteFile', handleDeleteFile as EventListener);
       window.removeEventListener('recoverFile', handleRecoverFile as EventListener);
       window.removeEventListener('permanentDeleteFile', handlePermanentDeleteFile as EventListener);
+      window.removeEventListener('renameFile', handleRenameFile as EventListener);
       window.removeEventListener('filesUpdated', handleFilesUpdated);
     };
   }, []); // Empty dependency array - event listeners are stable
@@ -433,6 +472,33 @@ export function ContentTable({ activeNavigation }: ContentTableProps) {
     }
   };
 
+  const handleRenameConfirm = async (newFileName: string) => {
+    if (!renameDialog.fileId) return;
+
+    setRenameDialog(prev => ({ ...prev, isLoading: true }));
+
+    try {
+      await renameFile(renameDialog.fileId, newFileName);
+      // Refresh the files list
+      await refetch();
+      
+      // Dispatch filesUpdated event to update counts in sidebar
+      const filesUpdatedEvent = new CustomEvent('filesUpdated');
+      window.dispatchEvent(filesUpdatedEvent);
+      
+      setRenameDialog({
+        isOpen: false,
+        fileId: null,
+        fileName: null,
+        isLoading: false
+      });
+    } catch (error) {
+      console.error('Rename failed:', error);
+      alert('Failed to rename file. Please try again.');
+      setRenameDialog(prev => ({ ...prev, isLoading: false }));
+    }
+  };
+
   const handleDeleteCancel = () => {
     setDeleteDialog({
       isOpen: false,
@@ -453,6 +519,15 @@ export function ContentTable({ activeNavigation }: ContentTableProps) {
 
   const handlePermanentDeleteCancel = () => {
     setPermanentDeleteDialog({
+      isOpen: false,
+      fileId: null,
+      fileName: null,
+      isLoading: false
+    });
+  };
+
+  const handleRenameCancel = () => {
+    setRenameDialog({
       isOpen: false,
       fileId: null,
       fileName: null,
@@ -640,6 +715,15 @@ export function ContentTable({ activeNavigation }: ContentTableProps) {
         onConfirm={handlePermanentDeleteConfirm}
         fileName={permanentDeleteDialog.fileName || ''}
         isLoading={permanentDeleteDialog.isLoading}
+      />
+
+      {/* Rename Dialog */}
+      <RenameDialog
+        isOpen={renameDialog.isOpen}
+        onClose={handleRenameCancel}
+        onConfirm={handleRenameConfirm}
+        currentFileName={renameDialog.fileName || ''}
+        isLoading={renameDialog.isLoading}
       />
     </div>
   )
