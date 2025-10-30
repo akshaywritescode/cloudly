@@ -10,6 +10,11 @@ export async function downloadFile(fileId: string, fileName: string) {
     
     // Fetch the actual file content from the URL
     const response = await fetch(fileUrl.toString());
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch file: ${response.status} ${response.statusText}`);
+    }
+    
     const blob = await response.blob();
     
     // Create download link
