@@ -152,3 +152,13 @@ export async function renameFile(fileId: string, newFileName: string) {
     throw error;
   }
 }
+
+export async function toggleStarFile(fileId: string, isStarred: boolean) {
+  try {
+    const response = await updateFileRecord(fileId, { isStarred });
+    return response;
+  } catch (error) {
+    console.error('Error toggling star for file:', error);
+    throw error;
+  }
+}

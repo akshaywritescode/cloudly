@@ -14,7 +14,7 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal, Copy, Download, Share, Trash2, RotateCcw, Pencil } from "lucide-react"
+import { ArrowUpDown, ChevronDown, MoreHorizontal, Copy, Download, Share, Trash2, RotateCcw, Pencil, Star } from "lucide-react"
 import sadIllustration from "@/app/assets/sad-illustration.svg"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -45,7 +45,7 @@ import PermanentDeleteConfirmDialog from "./PermanentDeleteConfirmDialog"
 import RenameDialog from "./RenameDialog"
 import { downloadFile } from "@/lib/download"
 import { moveFileToTrash, restoreFileFromTrash, permanentlyDeleteFile } from "@/lib/delete"
-import { renameFile } from "@/lib/files"
+import { renameFile, toggleStarFile } from "@/lib/files"
 
 export type File = {
   id: string
@@ -199,6 +199,23 @@ export const columns: ColumnDef<FileData>[] = [
                   Copy file ID
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  className="cursor-pointer"
+                  onClick={async () => {
+                    try {
+                      await toggleStarFile(file.id, !file.isStarred);
+                      // Refresh the files list
+                      const event = new CustomEvent('filesUpdated');
+                      window.dispatchEvent(event);
+                    } catch (error) {
+                      console.error('Failed to toggle star:', error);
+                      alert('Failed to update star status. Please try again.');
+                    }
+                  }}
+                >
+                  <Star className={`w-4 h-4 mr-2 ${file.isStarred ? 'fill-yellow-400 text-yellow-400' : ''}`} />
+                  {file.isStarred ? 'Unstar' : 'Star'}
+                </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="cursor-pointer"
                   onClick={() => {
