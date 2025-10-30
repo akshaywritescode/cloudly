@@ -13,6 +13,7 @@ import DashboardContent from "./components/DashboardContent";
 import { SearchProvider } from "@/hooks/useSearch";
 import { NotificationProvider } from "@/hooks/useNotifications";
 import { ThemeProvider } from "@/providers/theme-provider";
+import PointerEventsCleanup from "./PointerEventsCleanup";
 
 
 export type NavigationItem = {
@@ -44,7 +45,8 @@ export default function Dashboard() {
       <ProtectedRoute>
         <SearchProvider>
           <NotificationProvider>
-            <div className="h-screen w-full"> {/* 💡 Enforce full height */}
+            <PointerEventsCleanup />
+            <div className="h-screen w-full">
               <ResizablePanelGroup
                 direction="horizontal"
                 className="h-full w-full"
