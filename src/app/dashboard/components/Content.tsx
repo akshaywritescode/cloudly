@@ -48,6 +48,9 @@ import { moveFileToTrash, restoreFileFromTrash, permanentlyDeleteFile } from "@/
 import { renameFile, toggleStarFile } from "@/lib/files"
 import Heading2 from "@/components/Heading2"
 import FilePreviewDialog from "./FilePreviewDialog"
+import BulkDeleteConfirmDialog from "./BulkDeleteConfirmDialog"
+import BulkRecoverConfirmDialog from "./BulkRecoverConfirmDialog"
+import BulkPermanentDeleteConfirmDialog from "./BulkPermanentDeleteConfirmDialog"
 
 export type File = {
   id: string
@@ -265,6 +268,12 @@ export function ContentTable({ activeNavigation }: ContentTableProps) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+  // Bulk dialogs state
+  const [bulkDeleteDialog, setBulkDeleteDialog] = React.useState<{ isOpen: boolean; isLoading: boolean; }>({ isOpen: false, isLoading: false });
+  const [bulkRecoverDialog, setBulkRecoverDialog] = React.useState<{ isOpen: boolean; isLoading: boolean; }>({ isOpen: false, isLoading: false });
+  const [bulkPermanentDeleteDialog, setBulkPermanentDeleteDialog] = React.useState<{ isOpen: boolean; isLoading: boolean; }>(
+    { isOpen: false, isLoading: false }
+  );
 
   // Dialog states
   const [previewFile, setPreviewFile] = React.useState<FileData | null>(null);
@@ -555,6 +564,75 @@ export function ContentTable({ activeNavigation }: ContentTableProps) {
     },
   })
 
+  const selectedRows = table.getFilteredSelectedRowModel().rows;
+  const selectedCount = selectedRows.length;
+
+  const openBulkDelete = () => setBulkDeleteDialog({ isOpen: true, isLoading: false });
+  const closeBulkDelete = () => setBulkDeleteDialog({ isOpen: false, isLoading: false });
+  const openBulkRecover = () => setBulkRecoverDialog({ isOpen: true, isLoading: false });
+  const closeBulkRecover = () => setBulkRecoverDialog({ isOpen: false, isLoading: false });
+  const openBulkPermanentDelete = () => setBulkPermanentDeleteDialog({ isOpen: true, isLoading: false });
+  const closeBulkPermanentDelete = () => setBulkPermanentDeleteDialog({ isOpen: false, isLoading: false });
+
+  const handleBulkDeleteConfirm = async () => {
+    try {
+      setBulkDeleteDialog(prev => ({ ...prev, isLoading: true }));
+      const ids = selectedRows.map(r => (r.original as FileData).id);
+      for (const id of ids) {
+        await moveFileToTrash(id);
+      }
+      await refetch();
+      setRowSelection({});
+      const event = new CustomEvent('filesUpdated');
+      window.dispatchEvent(event);
+      closeBulkDelete();
+    } catch (error) {
+      console.error('Bulk delete failed:', error);
+      alert('Failed to move some files to trash. Please try again.');
+      setBulkDeleteDialog(prev => ({ ...prev, isLoading: false }));
+    }
+  };
+
+  const handleBulkRecoverConfirm = async () => {
+    try {
+      setBulkRecoverDialog(prev => ({ ...prev, isLoading: true }));
+      const ids = selectedRows.map(r => (r.original as FileData).id);
+      for (const id of ids) {
+        await restoreFileFromTrash(id);
+      }
+      await refetch();
+      setRowSelection({});
+      const event = new CustomEvent('filesUpdated');
+      window.dispatchEvent(event);
+      closeBulkRecover();
+    } catch (error) {
+      console.error('Bulk recover failed:', error);
+      alert('Failed to recover some files. Please try again.');
+      setBulkRecoverDialog(prev => ({ ...prev, isLoading: false }));
+    }
+  };
+
+  const handleBulkPermanentDeleteConfirm = async () => {
+    try {
+      setBulkPermanentDeleteDialog(prev => ({ ...prev, isLoading: true }));
+      const ids = selectedRows.map(r => (r.original as FileData).id);
+      for (const id of ids) {
+        await permanentlyDeleteFile(id);
+      }
+      await refetch();
+      setRowSelection({});
+      const event = new CustomEvent('filesUpdated');
+      window.dispatchEvent(event);
+      closeBulkPermanentDelete();
+    } catch (error) {
+      console.error('Bulk permanent delete failed:', error);
+      alert('Failed to delete some files. Please try again.');
+      setBulkPermanentDeleteDialog(prev => ({ ...prev, isLoading: false }));
+    }
+  };
+
+  const inTrashView = activeNavigation.id === 'trash';
+
   if (loading) {
     return (
       <div className="w-full">
@@ -576,6 +654,25 @@ export function ContentTable({ activeNavigation }: ContentTableProps) {
           }
           className="max-w-sm"
         />
+        {selectedCount > 0 && (
+          <div className="ml-4 flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">{selectedCount} selected</span>
+            {inTrashView ? (
+              <>
+                <Button size="sm" onClick={openBulkRecover}>
+                  Recover Selected
+                </Button>
+                <Button variant="destructive" size="sm" onClick={openBulkPermanentDelete}>
+                  Delete Permanently
+                </Button>
+              </>
+            ) : (
+              <Button variant="destructive" size="sm" onClick={openBulkDelete}>
+                Move Selected to Trash
+              </Button>
+            )}
+          </div>
+        )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
@@ -732,6 +829,28 @@ export function ContentTable({ activeNavigation }: ContentTableProps) {
         fileId={previewFile?.fileId || ''}
         fileName={previewFile?.fileName || ''}
         fileType={previewFile?.fileType || 'images'}
+      />
+      {/* Bulk action dialogs */}
+      <BulkDeleteConfirmDialog
+        isOpen={bulkDeleteDialog.isOpen}
+        onClose={closeBulkDelete}
+        onConfirm={handleBulkDeleteConfirm}
+        count={selectedCount}
+        isLoading={bulkDeleteDialog.isLoading}
+      />
+      <BulkRecoverConfirmDialog
+        isOpen={bulkRecoverDialog.isOpen}
+        onClose={closeBulkRecover}
+        onConfirm={handleBulkRecoverConfirm}
+        count={selectedCount}
+        isLoading={bulkRecoverDialog.isLoading}
+      />
+      <BulkPermanentDeleteConfirmDialog
+        isOpen={bulkPermanentDeleteDialog.isOpen}
+        onClose={closeBulkPermanentDelete}
+        onConfirm={handleBulkPermanentDeleteConfirm}
+        count={selectedCount}
+        isLoading={bulkPermanentDeleteDialog.isLoading}
       />
     </div>
   )
