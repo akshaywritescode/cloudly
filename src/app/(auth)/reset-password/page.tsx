@@ -85,7 +85,7 @@ export default function ResetPassword() {
                         <p className="mt-3 text-center font-normal text-black/50">
                             Enter the new password that you want to set.
                         </p>
-                        <form onSubmit={handleSubmit(onSubmit)} className="mt-7 w-full px-4 flex flex-col gap-4">
+                        <form onSubmit={handleSubmit(onSubmit)} className="mt-7 w-full max-w-md px-4 flex flex-col gap-4">
                             <PasswordInput
                                 placeholder="New Password"
                                 {...register("password")}
