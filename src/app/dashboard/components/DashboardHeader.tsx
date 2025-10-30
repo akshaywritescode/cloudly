@@ -12,6 +12,9 @@ import { useSearch } from '@/hooks/useSearch';
 import LogoutConfirmDialog from './LogoutConfirmDialog';
 import SettingsDialog from './SettingsDialog';
 import NotificationDropdown from './NotificationDropdown';
+import ThemeSwitcher from './ThemeSwitcher';
+import { Card } from '@/components/ui/card';
+
 
 interface User {
   name: string;
@@ -25,7 +28,7 @@ export default function DashboardHeader() {
   const [showSettingsDialog, setShowSettingsDialog] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const router = useRouter();
-  
+
   const { searchQuery, setSearchQuery, performSearch, clearSearch, isSearchActive } = useSearch();
 
   useEffect(() => {
@@ -34,7 +37,7 @@ export default function DashboardHeader() {
       if (currentUser) {
         // Load profile picture from database
         const profilePicture = await getUserProfilePicture();
-        
+
         setUser({
           name: currentUser.name,
           email: currentUser.email,
@@ -94,13 +97,13 @@ export default function DashboardHeader() {
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
-    
+
     // Perform search as user types (with debounce)
     if (value.trim()) {
       const timeoutId = setTimeout(() => {
         performSearch(value.trim());
       }, 300);
-      
+
       return () => clearTimeout(timeoutId);
     } else {
       clearSearch();
@@ -113,10 +116,10 @@ export default function DashboardHeader() {
 
   return (
     <>
-      <header className="w-[99%] m-auto bg-white border-b border-gray-200 px-6 py-4">
+      <Card className="w-[99%] m-auto border-b px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Search Bar */}
-          <div className="flex-1 max-w-md">
+          <div className="">
             <form onSubmit={handleSearch} className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
@@ -138,6 +141,8 @@ export default function DashboardHeader() {
             </form>
           </div>
 
+          <ThemeSwitcher defaultValue="dark" />
+
           {/* Right Side Actions */}
           <div className="flex items-center gap-4">
             {/* Notifications */}
@@ -153,13 +158,13 @@ export default function DashboardHeader() {
                   {user?.email || ''}
                 </p>
               </div>
-              
+
               {/* User Avatar */}
               <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
                 {user?.profilePicture ? (
-                  <img 
-                    src={user.profilePicture} 
-                    alt="Profile" 
+                  <img
+                    src={user.profilePicture}
+                    alt="Profile"
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -168,8 +173,8 @@ export default function DashboardHeader() {
               </div>
 
               {/* Settings */}
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="sm"
                 onClick={handleSettingsClick}
                 className="cursor-pointer"
@@ -178,9 +183,9 @@ export default function DashboardHeader() {
               </Button>
 
               {/* Logout */}
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={handleLogoutClick}
                 className="cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50"
               >
@@ -189,7 +194,7 @@ export default function DashboardHeader() {
             </div>
           </div>
         </div>
-      </header>
+      </Card>
 
       <LogoutConfirmDialog
         isOpen={showLogoutDialog}
