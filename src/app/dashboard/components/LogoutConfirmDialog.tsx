@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
+import Heading1 from '@/components/Heading1';
 
 interface LogoutConfirmDialogProps {
   isOpen: boolean;
@@ -30,7 +31,9 @@ export default function LogoutConfirmDialog({
       <DialogContent className='w-[25rem]'>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-black">
-            Confirm Logout
+            <Heading1>
+              Confirm Logout
+            </Heading1>
           </DialogTitle>
           <DialogDescription>
             Are you sure you want to logout{userName ? `, ${userName}` : ''}?

@@ -17,7 +17,7 @@ export default function Heading1({ className, children }: THeading) {
     }, []);
 
     // Avoid rendering theme-based class until mounted
-    const themeClass = !mounted ? "" : theme === "light" ? "text-black/10" : "text-white/80";
+    const themeClass = !mounted ? "" : theme === "light" ? "text-black/80" : "text-white/80";
 
     return <h1 className={`${className} ${themeClass}`}>{children}</h1>
 }
