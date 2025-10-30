@@ -47,6 +47,7 @@ import { downloadFile } from "@/lib/download"
 import { moveFileToTrash, restoreFileFromTrash, permanentlyDeleteFile } from "@/lib/delete"
 import { renameFile, toggleStarFile } from "@/lib/files"
 import Heading2 from "@/components/Heading2"
+import FilePreviewDialog from "./FilePreviewDialog"
 
 export type File = {
   id: string
@@ -94,16 +95,33 @@ export const columns: ColumnDef<FileData>[] = [
     },
     cell: ({ row }) => {
       const file = row.original;
+      const [previewOpen, setPreviewOpen] = React.useState(false);
       return (
-        <div className="flex items-center gap-3">
-          <ImagePreview 
-            fileId={file.fileId} 
-            fileName={file.fileName} 
+        <>
+          <div className="flex items-center gap-3">
+            <ImagePreview 
+              fileId={file.fileId} 
+              fileName={file.fileName} 
+              fileType={file.fileType}
+              className="w-8 h-8"
+            />
+            <button
+              className="font-medium text-black underline hover:opacity-80 focus:outline-none"
+              onClick={() => setPreviewOpen(true)}
+              title="Preview file"
+              type="button"
+            >
+              {file.fileName}
+            </button>
+          </div>
+          <FilePreviewDialog
+            open={previewOpen}
+            onOpenChange={setPreviewOpen}
+            fileId={file.fileId}
+            fileName={file.fileName}
             fileType={file.fileType}
-            className="w-8 h-8"
           />
-          <div className="font-medium">{file.fileName}</div>
-        </div>
+        </>
       );
     },
   },
