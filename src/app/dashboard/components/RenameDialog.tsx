@@ -55,7 +55,7 @@ export default function RenameDialog({
     onConfirm(trimmedName);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !isLoading) {
       handleConfirm();
     }
@@ -80,7 +80,7 @@ export default function RenameDialog({
               setNewFileName(e.target.value);
               setError('');
             }}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyDown}
             placeholder="Enter new file name"
             disabled={isLoading}
             autoFocus
