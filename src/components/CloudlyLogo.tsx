@@ -2,13 +2,10 @@
 
 import { Cloud } from "lucide-react";
 import { useTheme } from "next-themes";
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
-type TLogo = {
-    className?: string;
-};
 
-export default function ({ className }: TLogo) {
+export default function CloudlyLogo() {
     const { theme } = useTheme();
     const [mounted, setMounted] = useState(false);
 
