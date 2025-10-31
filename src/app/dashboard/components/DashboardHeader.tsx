@@ -117,10 +117,10 @@ export default function DashboardHeader() {
 
   return (
     <>
-      <Card className="w-[99%] m-auto border-b px-6 py-4 mt-2">
-        <div className="flex items-center justify-between">
+      <Card className="w-[99%] m-auto border-b px-4 sm:px-6 py-4 mt-2">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           {/* Search Bar */}
-          <div className="">
+          <div className="w-full sm:w-auto flex-1">
             <form onSubmit={handleSearch} className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
@@ -142,15 +142,14 @@ export default function DashboardHeader() {
             </form>
           </div>
 
-
           {/* Right Side Actions */}
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             {/* Notifications */}
             <NotificationDropdown />
 
             {/* User Profile Dropdown */}
             <div className="flex items-center gap-3">
-              <div className="text-right">
+              <div className="text-right hidden sm:block">
                 <Heading1 className="text-sm font-medium text-gray-900">
                   {user?.name || 'Loading...'}
                 </Heading1>
